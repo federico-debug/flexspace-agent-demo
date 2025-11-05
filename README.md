@@ -1,4 +1,4 @@
-# Retell Logistics Demo
+# Retell Sidetool Logistics
 
 Canadian Logistics AI Agent - Lead Qualification & FAQ Support with Retell AI. A demonstration of Retell AI web call functionality that allows users to have voice conversations with an AI agent directly in their browser.
 
