@@ -99,6 +99,7 @@ export class ChatService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          agent_id: CONFIG.chatAgentId,
           chat_id: this.chatId,
           message: message
         })
