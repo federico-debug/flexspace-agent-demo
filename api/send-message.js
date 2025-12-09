@@ -4,7 +4,7 @@
  */
 
 export default async function handler(req, res) {
-  // CORS
+  // ✅ CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
@@ -32,6 +32,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'chat_id and message are required' });
     }
 
+    // ✅ ENDPOINT CORRECTO SEGÚN DOC
     const response = await fetch('https://api.retellai.com/create-chat-completion', {
       method: 'POST',
       headers: {
@@ -39,16 +40,14 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${RETELL_API_KEY}`
       },
       body: JSON.stringify({
-        chat_id,
-        messages: [
-          { role: 'user', content: message }
-        ]
+        chat_id: chat_id,
+        content: message   // ⚠️ ESTE ERA TU ERROR: NO VA messages[]
       })
     });
 
     if (!response.ok) {
       const text = await response.text();
-      console.error('Retell API error:', text);
+      console.error('❌ Retell API error:', text);
       return res.status(response.status).json({ error: text });
     }
 

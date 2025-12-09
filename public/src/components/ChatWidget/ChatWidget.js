@@ -37,8 +37,8 @@ export class ChatWidget {
     this.messagesContainer = document.createElement('div');
     this.messagesContainer.className = 'chat-messages';
 
-    // Welcome message
-    this.addWelcomeMessage();
+    // ❌ QUITAMOS EL WELCOME HARDCODEADO
+    // this.addWelcomeMessage();
 
     // Input container
     const inputContainer = document.createElement('div');
@@ -69,24 +69,6 @@ export class ChatWidget {
     this.setupEventListeners();
 
     return widget;
-  }
-
-  /**
-   * Add welcome message to chat
-   */
-  addWelcomeMessage() {
-    const welcomeMsg = document.createElement('div');
-    welcomeMsg.className = 'chat-message bot-message';
-    welcomeMsg.innerHTML = `
-      <div class="message-avatar">
-        <span>${CONFIG.chatBotName.charAt(0)}</span>
-      </div>
-      <div class="message-content">
-        <div class="message-sender">${CONFIG.chatBotName}</div>
-        <div class="message-text">Hi! I'm ${CONFIG.chatBotName}, your logistics assistant. How can I help you today?</div>
-      </div>
-    `;
-    this.messagesContainer.appendChild(welcomeMsg);
   }
 
   /**
@@ -139,12 +121,13 @@ export class ChatWidget {
     this.setProcessing(true);
 
     try {
-      // Create chat session if not exists
+      // ✅ SOLO ACÁ SE CREA EL CHAT
       if (!this.chatService.isActiveChat()) {
+        console.log('🟢 Creating chat from first message...');
         await this.chatService.createChat();
       }
 
-      // Send message
+      // ✅ Luego se envía el mensaje
       await this.chatService.sendMessage(message);
     } catch (error) {
       console.error('Error sending message:', error);
@@ -155,7 +138,6 @@ export class ChatWidget {
 
   /**
    * Add user message to chat
-   * @param {string} text - Message text
    */
   addUserMessage(text) {
     const msgElement = document.createElement('div');
@@ -175,10 +157,8 @@ export class ChatWidget {
 
   /**
    * Add bot message to chat
-   * @param {string} text - Message text
    */
   addBotMessage(text) {
-    // Remove typing indicator if exists
     this.removeTypingIndicator();
 
     const msgElement = document.createElement('div');
@@ -196,9 +176,6 @@ export class ChatWidget {
     this.scrollToBottom();
   }
 
-  /**
-   * Show typing indicator
-   */
   showTypingIndicator() {
     if (this.messagesContainer.querySelector('.typing-indicator')) return;
 
@@ -220,20 +197,11 @@ export class ChatWidget {
     this.scrollToBottom();
   }
 
-  /**
-   * Remove typing indicator
-   */
   removeTypingIndicator() {
     const indicator = this.messagesContainer.querySelector('.typing-indicator');
-    if (indicator) {
-      indicator.remove();
-    }
+    if (indicator) indicator.remove();
   }
 
-  /**
-   * Set processing state
-   * @param {boolean} processing - Is processing
-   */
   setProcessing(processing) {
     this.isProcessing = processing;
     this.sendButton.disabled = processing;
@@ -248,10 +216,6 @@ export class ChatWidget {
     }
   }
 
-  /**
-   * Show error message
-   * @param {string} message - Error message
-   */
   showError(message) {
     const errorElement = document.createElement('div');
     errorElement.className = 'chat-error';
@@ -259,74 +223,30 @@ export class ChatWidget {
     this.messagesContainer.appendChild(errorElement);
     this.scrollToBottom();
 
-    // Remove after 5 seconds
     setTimeout(() => {
       errorElement.remove();
     }, 5000);
   }
 
-  /**
-   * Scroll chat to bottom
-   */
   scrollToBottom() {
     setTimeout(() => {
       this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     }, 100);
   }
 
-  /**
-   * Escape HTML to prevent XSS
-   * @param {string} text - Text to escape
-   * @returns {string}
-   */
   escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
 
-  /**
-   * Clear chat messages
-   */
-  clearMessages() {
-    this.messagesContainer.innerHTML = '';
-    this.addWelcomeMessage();
-  }
-
-  /**
-   * Show/hide widget
-   * @param {boolean} show - Show or hide
-   */
-  setVisible(show) {
-    if (this.element) {
-      this.element.style.display = show ? 'flex' : 'none';
-    }
-  }
-
-  /**
-   * Mount the component
-   * @param {HTMLElement} parent
-   */
   mount(parent) {
     parent.appendChild(this.create());
   }
 
-  /**
-   * Unmount the component
-   */
-  unmount() {
-    if (this.element && this.element.parentNode) {
-      this.element.parentNode.removeChild(this.element);
-    }
-  }
-
-  /**
-   * Destroy and cleanup
-   */
   destroy() {
     if (this.chatService.isActiveChat()) {
       this.chatService.endChat();
     }
-    this.unmount();
   }
 }

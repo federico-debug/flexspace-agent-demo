@@ -212,31 +212,18 @@ class App {
    * Toggle floating chat widget
    * @param {boolean} isOpen - Is chat open
    */
-  async toggleFloatingChat(isOpen) {
+  toggleFloatingChat(isOpen) {
     console.log(`💬 Floating chat ${isOpen ? 'opened' : 'closed'}`);
-  
+
     if (isOpen) {
-      // Mostrar UI
+      // Solo mostrar la UI flotante
       this.chatContainer.classList.add('floating');
       this.chatContainer.style.display = 'flex';
-  
-      // ✅ CREAR SESIÓN DE CHAT AL ABRIR
-      if (!this.chatService.isActiveChat()) {
-        try {
-          console.log('🟢 Creating chat session from floating button...');
-          await this.chatService.createChat();
-          console.log('✅ Chat session created:', this.chatService.chatId);
-        } catch (err) {
-          console.error('❌ Failed to create chat session:', err);
-        }
-      }
-  
     } else {
       this.chatContainer.classList.remove('floating');
       this.chatContainer.style.display = 'none';
     }
   }
-  
 }
 
 // Initialize app when DOM is ready
