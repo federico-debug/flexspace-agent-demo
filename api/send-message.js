@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'chat_id and message are required' });
     }
 
-    const response = await fetch('https://api.retellai.com/v2/chat-completions', {
+    const response = await fetch('https://api.retellai.com/create-chat-completion', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     }
 
     // ✅ ESTE ES EL ENDPOINT CORRECTO DE RETELL
-    const response = await fetch('https://api.retellai.com/v2/create-chat', {
+    const response = await fetch('https://api.retellai.com/create-chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
