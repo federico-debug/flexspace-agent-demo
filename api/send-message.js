@@ -3,17 +3,12 @@
  * Sends a message and creates chat completion with Retell AI
  */
 
-const RETELL_API_KEY = process.env.RETELL_API_KEY ;
-
 export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization'
-  );
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -52,7 +47,7 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) {
-      const text = await response.text(); // ✅ NUNCA json() en error
+      const text = await response.text();
       console.error('Retell API error:', text);
       return res.status(response.status).json({ error: text });
     }
@@ -61,7 +56,7 @@ export default async function handler(req, res) {
     return res.status(200).json(data);
 
   } catch (error) {
-    console.error('❌ Error sending message:', error);
+    console.error('❌ send-message error:', error);
     return res.status(500).json({
       error: 'Internal server error',
       message: error.message
