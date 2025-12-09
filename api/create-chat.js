@@ -6,7 +6,6 @@
 const RETELL_API_KEY = process.env.RETELL_API_KEY || 'key_91dba3204858e9738dcdeed28fca';
 
 export default async function handler(req, res) {
-  // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -16,8 +15,7 @@ export default async function handler(req, res) {
   );
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
@@ -25,29 +23,32 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { agent_id } = req.body;
+    const RETELL_API_KEY = process.env.RETELL_API_KEY;
+
+    if (!RETELL_API_KEY) {
+      return res.status(500).json({ error: 'Missing RETELL_API_KEY env variable' });
+    }
+
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { agent_id } = body || {};
 
     if (!agent_id) {
       return res.status(400).json({ error: 'agent_id is required' });
     }
 
-    // Call Retell API - using create-chat-completion to initialize chat
-    const response = await fetch('https://api.retellai.com/create-chat-completion', {
+    const response = await fetch('https://api.retellai.com/v2/create-chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RETELL_API_KEY}`
+        'X-Retell-API-Key': RETELL_API_KEY
       },
-      body: JSON.stringify({
-        agent_id,
-        message: '' // Empty message to initialize chat
-      })
+      body: JSON.stringify({ agent_id })
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Retell API error:', errorData);
-      return res.status(response.status).json(errorData);
+      const text = await response.text();
+      console.error('Retell API error:', text);
+      return res.status(response.status).json({ error: text });
     }
 
     const data = await response.json();

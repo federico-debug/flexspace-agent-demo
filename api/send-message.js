@@ -32,11 +32,11 @@ export default async function handler(req, res) {
     }
 
     // Call Retell API to create chat completion
-    const response = await fetch('https://api.retellai.com/create-chat-completion', {
+    const response = await fetch('https://api.retellai.com/v2/create-chat-completion', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RETELL_API_KEY}`
+        'X-Retell-API-Key': RETELL_API_KEY
       },
       body: JSON.stringify({
         agent_id: req.body.agent_id || 'agent_283b52d2fe12ca91ed9ebb53fa',
