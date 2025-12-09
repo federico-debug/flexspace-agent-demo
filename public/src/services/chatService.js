@@ -118,16 +118,17 @@ export class ChatService {
       // The API returns the messages array with the conversation history
       let botContent = '';
 
-      if (data.messages && Array.isArray(data.messages)) {
-        // Find the last assistant message
-        const lastAssistantMsg = data.messages.reverse().find(msg => msg.role === 'assistant');
-        if (lastAssistantMsg) {
-          botContent = lastAssistantMsg.content;
-        }
-      } else if (data.response) {
-        // Some APIs return a direct response field
-        botContent = data.response;
-      }
+if (typeof data.response === 'string') {
+  botContent = data.response;
+} 
+else if (typeof data.output_text === 'string') {
+  botContent = data.output_text;
+} 
+else {
+  console.warn('⚠️ Unknown Retell response format:', data);
+  botContent = 'No response received';
+}
+
 
       const botMessage = {
         role: 'assistant',
