@@ -118,20 +118,31 @@ export class ChatService {
       // The API returns the messages array with the conversation history
       let botContent = '';
 
-if (typeof data.response === 'string') {
-  botContent = data.response;
-} 
-else if (typeof data.output_text === 'string') {
-  botContent = data.output_text;
-} 
-else {
-  console.warn('⚠️ Unknown Retell response format:', data);
-  botContent = 'No response received';
-}
+      if (Array.isArray(data.messages)) {
+        // Retell devuelve role = "agent"
+        const lastAgentMsg = [...data.messages]
+          .reverse()
+          .find(msg => msg.role === 'agent' && msg.content);
+      
+        if (lastAgentMsg) {
+          botContent = lastAgentMsg.content;
+        }
+      } 
+      else if (typeof data.response === 'string') {
+        botContent = data.response;
+      } 
+      else if (typeof data.output_text === 'string') {
+        botContent = data.output_text;
+      } 
+      else {
+        console.warn('⚠️ Unknown Retell response format:', data);
+        botContent = 'No response received';
+      }
+      
 
 
       const botMessage = {
-        role: 'assistant',
+        role: 'agent',
         content: botContent || 'No response received',
         timestamp: Date.now()
       };
