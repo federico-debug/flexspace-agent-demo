@@ -3,7 +3,7 @@
  * Sends a message and creates chat completion with Retell AI
  */
 
-const RETELL_API_KEY = process.env.RETELL_API_KEY || 'key_91dba3204858e9738dcdeed28fca';
+const RETELL_API_KEY = process.env.RETELL_API_KEY ;
 
 export default async function handler(req, res) {
   // CORS
