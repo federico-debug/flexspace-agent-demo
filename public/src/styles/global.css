@@ -1,0 +1,205 @@
+/* Global Styles and Reset */
+
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family-base);
+  background: var(--color-white);
+  min-height: 100vh;
+}
+
+/* Layout */
+header {
+  border-bottom: 1px solid var(--color-gray-200);
+  padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--spacing-2xl) var(--spacing-xl);
+}
+
+.content {
+  text-align: center;
+  max-width: var(--container-max-width);
+  width: 100%;
+}
+
+/* Typography */
+h1 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-xl);
+}
+
+h2 .subtitle {
+  color: var(--color-secondary);
+}
+
+.description {
+  font-size: var(--font-size-xl);
+  color: var(--color-secondary);
+  max-width: var(--content-max-width);
+  margin: 0 auto var(--spacing-4xl);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Utility Classes */
+.hidden {
+  display: none;
+}
+
+/* Buttons Base */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-md) var(--spacing-2xl);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-lg);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background: var(--color-red-600);
+  color: var(--color-white);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-md) var(--spacing-2xl);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-lg);
+}
+
+.btn-danger:hover {
+  background: var(--color-red-700);
+}
+
+/* Status displays */
+.error-box {
+  margin-top: var(--spacing-xl);
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  color: var(--color-error-text);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  max-width: var(--content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.success-text {
+  color: var(--color-success);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-xl);
+}
+
+.hint-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-secondary);
+  margin-top: var(--spacing-lg);
+}
+
+/* Widget Containers */
+.widget-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xl);
+  min-height: 600px;
+}
+
+.voice-widget-container {
+  display: flex;
+}
+
+.chat-widget-container {
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Floating Chat Widget */
+.chat-widget-container.floating {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  width: 400px;
+  height: auto;
+  max-height: 600px;
+  z-index: 999;
+  animation: slideInUp 0.3s ease-out;
+  display: flex !important;
+}
+
+.chat-widget-container.floating .chat-widget {
+  width: 100%;
+  max-width: 100%;
+  height: 600px;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 2rem;
+  }
+
+  .description {
+    font-size: var(--font-size-base);
+  }
+
+  /* Floating chat mobile */
+  .chat-widget-container.floating {
+    bottom: 80px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+
+  .chat-widget-container.floating .chat-widget {
+    height: 500px;
+  }
+}

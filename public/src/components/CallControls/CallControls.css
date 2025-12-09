@@ -1,0 +1,9 @@
+/* CallControls Component Styles */
+
+.call-controls {
+  margin: var(--spacing-xl) 0;
+}
+
+.call-controls button {
+  min-width: 200px;
+}

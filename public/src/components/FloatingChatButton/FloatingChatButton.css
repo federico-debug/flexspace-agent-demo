@@ -1,0 +1,83 @@
+/* Floating Chat Button */
+.floating-chat-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #000000;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.floating-chat-button:hover {
+  background: #1a1a1a;
+  transform: scale(1.1);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.floating-chat-button:active {
+  transform: scale(0.95);
+}
+
+/* Icons */
+.floating-chat-button .bot-icon {
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.floating-chat-button .close-icon {
+  display: none;
+  transition: all 0.3s ease;
+}
+
+.floating-chat-button.open .bot-icon {
+  display: none;
+}
+
+.floating-chat-button.open .close-icon {
+  display: block;
+}
+
+/* Pulse animation when closed */
+.floating-chat-button:not(.open)::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: #000000;
+  animation: buttonPulse 2s ease-in-out infinite;
+  z-index: -1;
+}
+
+@keyframes buttonPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .floating-chat-button {
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+  }
+}

@@ -1,0 +1,22 @@
+/* StatusBadge Component Styles */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-primary);
+  color: var(--color-white);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.pulse-dot {
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  background: var(--color-red-500);
+  border-radius: var(--radius-pill);
+  margin-right: var(--spacing-sm);
+  animation: pulse 2s infinite;
+}
