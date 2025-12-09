@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Retell-API-Key': RETELL_API_KEY
+        'Authorization': `Bearer ${RETELL_API_KEY}`
       },
       body: JSON.stringify({
         chat_id,
