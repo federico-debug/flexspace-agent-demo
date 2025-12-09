@@ -52,9 +52,10 @@ export class ChatService {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create chat session');
+        const text = await response.text();
+        throw new Error(text || 'Failed to create chat session');
       }
+      
 
       const data = await response.json();
       this.chatId = data.chat_id;
@@ -106,9 +107,10 @@ export class ChatService {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to send message');
+        const text = await response.text();
+        throw new Error(text || 'Failed to send message');
       }
+      
 
       const data = await response.json();
 

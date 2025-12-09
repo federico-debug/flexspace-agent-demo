@@ -22,3 +22,5 @@ yarn-error.log*
 
 # Claude Code documentation
 claude.md
+
+server.js
