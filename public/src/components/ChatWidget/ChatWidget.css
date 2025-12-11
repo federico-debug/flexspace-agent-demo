@@ -80,7 +80,7 @@
 .chat-message {
   display: flex;
   gap: 12px;
-  align-items: flex-start;
+  align-items: center;
   animation: messageSlideIn 0.3s ease-out;
 }
 
@@ -147,7 +147,7 @@
 }
 
 .user-message .message-content {
-  text-align: right;
+  text-align: left;
 }
 
 .user-message .message-text {

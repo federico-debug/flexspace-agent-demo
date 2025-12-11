@@ -10,6 +10,7 @@ export class ChatService {
     this.messages = [];
     this.isActive = false;
     this.listeners = {};
+    this.variables = {}; // Store extracted variables from conversation
   }
 
   /**
@@ -114,6 +115,16 @@ export class ChatService {
 
       const data = await response.json();
 
+      // Check if chat ended in the response (some APIs return status in response)
+      if (data.chat_status === 'ended' || data.status === 'ended' || data.ended === true) {
+        console.log('✅ Chat ended detected in API response');
+        this.isActive = false;
+        this.emit('chatEnded', { chatId: this.chatId, autoEnded: true });
+      }
+
+      // Extract variables from response if available
+      this.extractVariables(data);
+
       // Extract bot response from the response
       // The API returns the messages array with the conversation history
       let botContent = '';
@@ -186,6 +197,86 @@ export class ChatService {
   }
 
   /**
+   * Check if chat has ended according to Retell AI
+   * @returns {Promise<boolean>} True if chat has ended
+   */
+  async checkIfChatEnded() {
+    if (!this.chatId || !this.isActive) {
+      return false;
+    }
+
+    try {
+      const chatDetails = await this.getChatDetails();
+      
+      // Check multiple possible fields that indicate chat ended
+      // Common fields: ended_at, status, finished_at, end_time, is_ended
+      const isEnded = 
+        chatDetails.ended_at !== null && chatDetails.ended_at !== undefined ||
+        chatDetails.finished_at !== null && chatDetails.finished_at !== undefined ||
+        chatDetails.end_time !== null && chatDetails.end_time !== undefined ||
+        chatDetails.status === 'ended' ||
+        chatDetails.status === 'finished' ||
+        chatDetails.status === 'completed' ||
+        chatDetails.is_ended === true ||
+        chatDetails.finished === true;
+
+      if (isEnded) {
+        console.log('✅ Chat has ended according to Retell AI');
+        this.isActive = false;
+        this.emit('chatEnded', { chatId: this.chatId, autoEnded: true });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('❌ Error checking if chat ended:', error);
+      // If we can't check, assume chat is still active
+      return false;
+    }
+  }
+
+  /**
+   * Extract variables from API response
+   * @param {Object} data - API response data
+   */
+  extractVariables(data) {
+    // Check multiple possible locations for variables in Retell AI response
+    let vars = null;
+
+    if (data.variables && typeof data.variables === 'object') {
+      vars = data.variables;
+    } else if (data.metadata?.variables && typeof data.metadata.variables === 'object') {
+      vars = data.metadata.variables;
+    } else if (data.extracted_variables && typeof data.extracted_variables === 'object') {
+      vars = data.extracted_variables;
+    } else if (data.state?.variables && typeof data.state.variables === 'object') {
+      vars = data.state.variables;
+    }
+
+    if (vars) {
+      // Prioritize key variables for personalization
+      const priorityVars = ['first_name', 'last_name', 'email', 'company_name', 
+                            'user_number', 'call_type', 'primary_service_type'];
+      
+      Object.keys(vars).forEach(key => {
+        const value = vars[key];
+        // Only store non-empty values
+        if (value !== null && value !== undefined && value !== '') {
+          this.setVariable(key, value);
+          
+          // Log priority variables for debugging
+          if (priorityVars.includes(key)) {
+            console.log(`📝 Extracted variable: ${key} = ${value}`);
+          }
+        }
+      });
+
+      // Emit event with all updated variables
+      this.emit('variablesUpdated', this.getAllVariables());
+    }
+  }
+
+  /**
    * End the current chat session
    * @returns {Promise<void>}
    */
@@ -238,11 +329,47 @@ export class ChatService {
   }
 
   /**
+   * Get a specific variable
+   * @param {string} name - Variable name
+   * @returns {*} Variable value or undefined
+   */
+  getVariable(name) {
+    return this.variables[name];
+  }
+
+  /**
+   * Get all variables
+   * @returns {Object} All variables
+   */
+  getAllVariables() {
+    return { ...this.variables };
+  }
+
+  /**
+   * Set a variable
+   * @param {string} name - Variable name
+   * @param {*} value - Variable value
+   */
+  setVariable(name, value) {
+    this.variables[name] = value;
+    this.emit('variableUpdated', { name, value });
+  }
+
+  /**
+   * Clear all variables
+   */
+  clearVariables() {
+    this.variables = {};
+    this.emit('variablesCleared');
+  }
+
+  /**
    * Reset the service state
    */
   reset() {
     this.chatId = null;
     this.messages = [];
     this.isActive = false;
+    this.clearVariables();
   }
 }

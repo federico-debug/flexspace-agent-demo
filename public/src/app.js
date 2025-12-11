@@ -24,6 +24,7 @@ class App {
     this.currentMode = 'voice'; // 'voice' or 'chat'
     this.voiceContainer = null;
     this.chatContainer = null;
+    this.isChatWidgetOpen = false; // Track if chat widget is open
   }
 
   /**
@@ -33,6 +34,7 @@ class App {
     console.log('🎯 Retell Web Call Demo initialized');
     this.setupComponents();
     this.setupRetellService();
+    this.setupChatService();
   }
 
   /**
@@ -138,6 +140,35 @@ class App {
   }
 
   /**
+   * Setup Chat service callbacks
+   */
+  setupChatService() {
+    // When chat ends (explicitly via endChat()), check if widget is closed to clean up
+    // Note: This only fires if endChat() is called explicitly, not when widget is just closed
+    this.chatService.on('chatEnded', () => {
+      console.log('📞 Chat ended event received');
+      // Only cleanup if widget is closed
+      if (!this.isChatWidgetOpen) {
+        this.cleanupChatConversation();
+      } else {
+        // If widget is still open, just mark that chat ended
+        // The cleanup will happen when widget is closed
+        console.log('💬 Widget still open, will cleanup when closed');
+      }
+    });
+  }
+
+  /**
+   * Clean up chat conversation (messages, variables, state)
+   * Only called when conversation explicitly ended AND widget is closed
+   */
+  cleanupChatConversation() {
+    console.log('🧹 Cleaning up chat conversation');
+    this.components.chatWidget.clearMessages();
+    this.chatService.reset();
+  }
+
+  /**
    * Handle start call button click
    */
   async handleStartCall() {
@@ -212,8 +243,9 @@ class App {
    * Toggle floating chat widget
    * @param {boolean} isOpen - Is chat open
    */
-  toggleFloatingChat(isOpen) {
+  async toggleFloatingChat(isOpen) {
     console.log(`💬 Floating chat ${isOpen ? 'opened' : 'closed'}`);
+    this.isChatWidgetOpen = isOpen;
 
     if (isOpen) {
       // Solo mostrar la UI flotante
@@ -222,6 +254,24 @@ class App {
     } else {
       this.chatContainer.classList.remove('floating');
       this.chatContainer.style.display = 'none';
+      
+      // When widget closes, check if chat has ended in Retell AI
+      // This detects automatic chat termination (e.g., after inactivity)
+      if (this.chatService.isActiveChat()) {
+        try {
+          const chatEnded = await this.chatService.checkIfChatEnded();
+          if (chatEnded) {
+            // Chat ended, cleanup will happen via chatEnded event handler
+            console.log('🧹 Chat ended automatically, cleaning up...');
+          } else {
+            // Chat still active, keep it for when widget reopens
+            console.log('💬 Chat still active, keeping conversation');
+          }
+        } catch (error) {
+          console.error('❌ Error checking chat status:', error);
+          // On error, assume chat is still active
+        }
+      }
     }
   }
 }

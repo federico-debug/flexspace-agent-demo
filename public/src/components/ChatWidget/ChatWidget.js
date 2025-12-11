@@ -117,6 +117,9 @@ export class ChatWidget {
     this.inputField.value = '';
     this.inputField.style.height = 'auto';
 
+    // Maintain focus on input field
+    this.inputField.focus();
+
     // Set processing state
     this.setProcessing(true);
 
@@ -244,9 +247,19 @@ export class ChatWidget {
     parent.appendChild(this.create());
   }
 
+  /**
+   * Clear all messages from the chat
+   */
+  clearMessages() {
+    if (this.messagesContainer) {
+      this.messagesContainer.innerHTML = '';
+    }
+  }
+
   destroy() {
-    if (this.chatService.isActiveChat()) {
-      this.chatService.endChat();
+    // Don't automatically end chat - only clear UI if chat already ended
+    if (!this.chatService.isActiveChat()) {
+      this.clearMessages();
     }
   }
 }
