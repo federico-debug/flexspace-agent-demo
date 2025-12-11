@@ -77,22 +77,25 @@ export class ChatService {
   /**
    * Send a message and get response
    * @param {string} message - User message
+   * @param {boolean} skipUserMessage - Skip adding user message to history (for initial greeting)
    * @returns {Promise<Object>} Chat completion response
    */
-  async sendMessage(message) {
+  async sendMessage(message, skipUserMessage = false) {
     if (!this.chatId || !this.isActive) {
       throw new Error('No active chat session. Create a chat first.');
     }
 
     try {
-      // Add user message to local history
-      const userMessage = {
-        role: 'user',
-        content: message,
-        timestamp: Date.now()
-      };
-      this.messages.push(userMessage);
-      this.emit('messageSent', userMessage);
+      // Add user message to local history (skip for empty initial greeting)
+      if (!skipUserMessage && message.trim() !== '') {
+        const userMessage = {
+          role: 'user',
+          content: message,
+          timestamp: Date.now()
+        };
+        this.messages.push(userMessage);
+        this.emit('messageSent', userMessage);
+      }
 
       // Send to API via serverless function
       const response = await fetch('/api/send-message', {

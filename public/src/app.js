@@ -251,6 +251,14 @@ class App {
       // Solo mostrar la UI flotante
       this.chatContainer.classList.add('floating');
       this.chatContainer.style.display = 'flex';
+      
+      // Send initial greeting if no active chat
+      if (!this.chatService.isActiveChat()) {
+        // Small delay to ensure widget is fully rendered
+        setTimeout(() => {
+          this.components.chatWidget.sendInitialGreeting();
+        }, 300);
+      }
     } else {
       this.chatContainer.classList.remove('floating');
       this.chatContainer.style.display = 'none';

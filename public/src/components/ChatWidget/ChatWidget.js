@@ -105,6 +105,32 @@ export class ChatWidget {
   }
 
   /**
+   * Send initial greeting message when widget opens
+   */
+  async sendInitialGreeting() {
+    if (this.isProcessing || this.chatService.isActiveChat()) {
+      return; // Don't send if already processing or chat exists
+    }
+
+    try {
+      this.setProcessing(true);
+      
+      // Create chat first
+      console.log('🟢 Creating chat and sending initial greeting...');
+      await this.chatService.createChat();
+      
+      // Send empty message to trigger agent's initial greeting
+      // skipUserMessage=true so it doesn't show in UI as user message
+      await this.chatService.sendMessage('', true);
+      
+    } catch (error) {
+      console.error('Error sending initial greeting:', error);
+      // Don't show error to user, just log it
+      this.setProcessing(false);
+    }
+  }
+
+  /**
    * Handle send message
    */
   async handleSendMessage() {
