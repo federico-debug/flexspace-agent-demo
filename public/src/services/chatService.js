@@ -189,6 +189,10 @@ export class ChatService {
       });
 
       if (!response.ok) {
+        // If chat not found (404), it means chat was deleted/ended
+        if (response.status === 404) {
+          return { status: 'ended', ended: true };
+        }
         throw new Error('Failed to get chat details');
       }
 
@@ -213,15 +217,18 @@ export class ChatService {
       
       // Check multiple possible fields that indicate chat ended
       // Common fields: ended_at, status, finished_at, end_time, is_ended
+      // Also handle 404 case where chat was deleted/ended
       const isEnded = 
-        chatDetails.ended_at !== null && chatDetails.ended_at !== undefined ||
-        chatDetails.finished_at !== null && chatDetails.finished_at !== undefined ||
-        chatDetails.end_time !== null && chatDetails.end_time !== undefined ||
         chatDetails.status === 'ended' ||
         chatDetails.status === 'finished' ||
         chatDetails.status === 'completed' ||
+        chatDetails.status === 'error' ||
+        chatDetails.ended_at !== null && chatDetails.ended_at !== undefined ||
+        chatDetails.finished_at !== null && chatDetails.finished_at !== undefined ||
+        chatDetails.end_time !== null && chatDetails.end_time !== undefined ||
         chatDetails.is_ended === true ||
-        chatDetails.finished === true;
+        chatDetails.finished === true ||
+        chatDetails.chat_status === 'ended';
 
       if (isEnded) {
         console.log('✅ Chat has ended according to Retell AI');
@@ -232,6 +239,13 @@ export class ChatService {
 
       return false;
     } catch (error) {
+      // If error is 404, chat was deleted/ended
+      if (error.message && error.message.includes('404')) {
+        console.log('✅ Chat not found (404), treating as ended');
+        this.isActive = false;
+        this.emit('chatEnded', { chatId: this.chatId, autoEnded: true });
+        return true;
+      }
       console.error('❌ Error checking if chat ended:', error);
       // If we can't check, assume chat is still active
       return false;

@@ -80,7 +80,7 @@
 .chat-message {
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: flex-start;
   animation: messageSlideIn 0.3s ease-out;
 }
 
@@ -149,6 +149,33 @@
   display: inline-block;
   width: fit-content;
   max-width: 100%;
+  text-align: left;
+}
+
+/* Improve formatting for lists and structured content */
+.message-text ul,
+.message-text ol {
+  margin: 8px 0;
+  padding-left: 24px;
+  text-align: left;
+}
+
+.message-text li {
+  margin: 4px 0;
+  text-align: left;
+}
+
+.message-text p {
+  margin: 8px 0;
+  text-align: left;
+}
+
+.message-text p:first-child {
+  margin-top: 0;
+}
+
+.message-text p:last-child {
+  margin-bottom: 0;
 }
 
 .user-message .message-content {
@@ -161,10 +188,16 @@
   color: #ffffff;
   border-color: #000000;
   border-radius: 16px 16px 4px 16px;
+  text-align: left;
 }
 
 .bot-message .message-content {
   align-items: flex-start;
+  text-align: left;
+}
+
+.bot-message .message-text {
+  text-align: left;
 }
 
 .bot-message .message-text {
