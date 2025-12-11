@@ -124,8 +124,10 @@
 
 /* Message Content */
 .message-content {
-  flex: 1;
+  flex: 0 1 auto;
   max-width: 70%;
+  display: flex;
+  flex-direction: column;
 }
 
 .message-sender {
@@ -144,10 +146,14 @@
   line-height: 1.5;
   word-wrap: break-word;
   border: 1px solid #e5e7eb;
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .user-message .message-content {
   text-align: left;
+  align-items: flex-end;
 }
 
 .user-message .message-text {
@@ -155,6 +161,10 @@
   color: #ffffff;
   border-color: #000000;
   border-radius: 16px 16px 4px 16px;
+}
+
+.bot-message .message-content {
+  align-items: flex-start;
 }
 
 .bot-message .message-text {

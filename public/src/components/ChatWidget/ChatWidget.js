@@ -119,9 +119,10 @@ export class ChatWidget {
       console.log('🟢 Creating chat and sending initial greeting...');
       await this.chatService.createChat();
       
-      // Send empty message to trigger agent's initial greeting
+      // Send greeting message to trigger agent's initial response
+      // Using a simple greeting that agent can respond to
       // skipUserMessage=true so it doesn't show in UI as user message
-      await this.chatService.sendMessage('', true);
+      await this.chatService.sendMessage('Hello', true);
       
     } catch (error) {
       console.error('Error sending initial greeting:', error);
