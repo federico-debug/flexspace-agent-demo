@@ -166,6 +166,8 @@ class App {
     console.log('🧹 Cleaning up chat conversation');
     this.components.chatWidget.clearMessages();
     this.chatService.reset();
+    // Force reset server-side chat cache on next creation
+    this.chatService.shouldResetChat = true;
   }
 
   /**

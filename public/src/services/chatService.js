@@ -11,6 +11,7 @@ export class ChatService {
     this.isActive = false;
     this.listeners = {};
     this.variables = {}; // Store extracted variables from conversation
+    this.shouldResetChat = false; // Flag to reset server-side chat cache
   }
 
   /**
@@ -38,9 +39,10 @@ export class ChatService {
 
   /**
    * Create a new chat session
+   * @param {boolean} resetChat - Force reset of server-side chat cache
    * @returns {Promise<string>} Chat ID
    */
-  async createChat() {
+  async createChat(resetChat = false) {
     try {
       const response = await fetch('/api/create-chat', {
         method: 'POST',
@@ -48,7 +50,8 @@ export class ChatService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          agent_id: CONFIG.chatAgentId
+          agent_id: CONFIG.chatAgentId,
+          reset_chat: resetChat
         })
       });
 

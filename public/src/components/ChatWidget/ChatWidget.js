@@ -115,9 +115,11 @@ export class ChatWidget {
     try {
       this.setProcessing(true);
       
-      // Create chat first
+      // Create chat first - reset if needed
+      const shouldReset = this.chatService.shouldResetChat || false;
       console.log('🟢 Creating chat and sending initial greeting...');
-      await this.chatService.createChat();
+      await this.chatService.createChat(shouldReset);
+      this.chatService.shouldResetChat = false; // Clear flag after use
       
       // Send greeting message to trigger agent's initial response
       // Using a simple greeting that agent can respond to
@@ -235,7 +237,17 @@ export class ChatWidget {
   setProcessing(processing) {
     this.isProcessing = processing;
     this.sendButton.disabled = processing;
-    this.inputField.disabled = processing;
+    
+    // Use readOnly instead of disabled to maintain focus
+    // This prevents user input while keeping focus and cursor visible
+    this.inputField.readOnly = processing;
+    if (processing) {
+      this.inputField.style.cursor = 'not-allowed';
+    } else {
+      this.inputField.style.cursor = 'text';
+      // Ensure focus is maintained after processing ends
+      this.inputField.focus();
+    }
 
     if (processing) {
       this.showTypingIndicator();
