@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         chat_id: chat_id,
-        content: message   // ⚠️ ESTE ERA TU ERROR: NO VA messages[]
+        content: message  
       })
     });
 
