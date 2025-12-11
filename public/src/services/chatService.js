@@ -12,6 +12,7 @@ export class ChatService {
     this.listeners = {};
     this.variables = {}; // Store extracted variables from conversation
     this.shouldResetChat = false; // Flag to reset server-side chat cache
+    this.chatCreatedAt = null; // Timestamp when chat was created
   }
 
   /**
@@ -65,6 +66,7 @@ export class ChatService {
       this.chatId = data.chat_id;
       this.isActive = true;
       this.messages = [];
+      this.chatCreatedAt = Date.now(); // Store creation timestamp
 
       console.log('✅ Chat session created:', this.chatId);
       this.emit('chatCreated', { chatId: this.chatId });
@@ -193,8 +195,9 @@ export class ChatService {
 
       if (!response.ok) {
         // If chat not found (404), it means chat was deleted/ended
+        // This is expected and not an error - chat may have been auto-closed
         if (response.status === 404) {
-          return { status: 'ended', ended: true };
+          return { status: 'ended', ended: true, chat_status: 'ended' };
         }
         throw new Error('Failed to get chat details');
       }
@@ -212,6 +215,13 @@ export class ChatService {
    */
   async checkIfChatEnded() {
     if (!this.chatId || !this.isActive) {
+      return false;
+    }
+
+    // Don't check immediately after creation (within 2 seconds)
+    // This avoids false 404s when chat was just created
+    if (this.chatCreatedAt && (Date.now() - this.chatCreatedAt) < 2000) {
+      console.log('⏳ Chat too new, skipping status check');
       return false;
     }
 
@@ -325,6 +335,7 @@ export class ChatService {
       // Reset state
       this.chatId = null;
       this.messages = [];
+      this.chatCreatedAt = null;
     } catch (error) {
       console.error('❌ Error ending chat:', error);
       this.emit('error', error);
@@ -390,6 +401,7 @@ export class ChatService {
     this.chatId = null;
     this.messages = [];
     this.isActive = false;
+    this.chatCreatedAt = null;
     this.clearVariables();
   }
 }
