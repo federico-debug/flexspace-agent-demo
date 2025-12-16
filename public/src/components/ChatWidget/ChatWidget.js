@@ -43,15 +43,12 @@ export class ChatWidget {
     // ❌ QUITAMOS EL WELCOME HARDCODEADO
     // this.addWelcomeMessage();
 
-    // Starters (shown when no messages)
+    // Starters component (will be shown after agent's first message)
     if (CONFIG.chatStarters && CONFIG.chatStarters.length > 0) {
       this.startersComponent = new ExampleQuestions(
         CONFIG.chatStarters,
         (question) => this.handleStarterClick(question)
       );
-      this.startersContainer = this.startersComponent.render();
-      this.startersContainer.style.padding = '24px';
-      this.messagesContainer.appendChild(this.startersContainer);
     }
 
     // Input container
@@ -254,6 +251,12 @@ export class ChatWidget {
       </div>
     `;
     this.messagesContainer.appendChild(msgElement);
+    
+    // Show starters after first bot message if not already shown
+    if (this.startersComponent && !this.startersContainer) {
+      this.renderStarters();
+    }
+    
     this.scrollToBottom();
   }
 
@@ -336,11 +339,24 @@ export class ChatWidget {
   }
 
   /**
-   * Hide starters container
+   * Render and append starters to messages container
+   */
+  renderStarters() {
+    if (this.startersComponent && !this.startersContainer) {
+      this.startersContainer = this.startersComponent.render();
+      this.startersContainer.style.padding = '24px 0';
+      this.startersContainer.style.marginTop = '8px';
+      this.messagesContainer.appendChild(this.startersContainer);
+    }
+  }
+
+  /**
+   * Hide and remove starters container
    */
   hideStarters() {
     if (this.startersContainer) {
-      this.startersContainer.style.display = 'none';
+      this.startersContainer.remove();
+      this.startersContainer = null; // Mark as removed
     }
   }
 
@@ -359,13 +375,8 @@ export class ChatWidget {
   clearMessages() {
     if (this.messagesContainer) {
       this.messagesContainer.innerHTML = '';
-      
-      // Re-add starters container
-      if (this.startersComponent && CONFIG.chatStarters && CONFIG.chatStarters.length > 0) {
-        this.startersContainer = this.startersComponent.render();
-        this.startersContainer.style.padding = '24px';
-        this.messagesContainer.appendChild(this.startersContainer);
-      }
+      this.startersContainer = null; // Reset starters
+      // Starters will reappear when agent sends first message
     }
   }
 
