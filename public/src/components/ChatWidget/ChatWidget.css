@@ -116,6 +116,7 @@
 
 .user-avatar {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: none; /* Hide user avatar, only show agent avatar */
 }
 
 .message-avatar span {
