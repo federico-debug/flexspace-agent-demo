@@ -38,7 +38,9 @@ export default async function handler(req, res) {
     // If we have a current chat, verify it's still active before reusing
     if (currentChatId && !reset_chat) {
       try {
-        const checkResponse = await fetch(`https://api.retellai.com/v2/get-chat/${currentChatId}`, {
+        // Clean chat_id before making API call (remove 'chat_' prefix if present)
+        const cleanId = currentChatId.replace(/^chat_/, '');
+        const checkResponse = await fetch(`https://api.retellai.com/v2/get-chat/${cleanId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${RETELL_API_KEY}`,

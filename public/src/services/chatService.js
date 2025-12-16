@@ -16,6 +16,18 @@ export class ChatService {
   }
 
   /**
+   * Clean chat ID by removing 'chat_' prefix if present
+   * @param {string} chatId - Chat ID to clean
+   * @returns {string} Cleaned chat ID
+   * @private
+   */
+  _cleanChatId(chatId) {
+    if (!chatId) return null;
+    // Remove 'chat_' prefix if present for API calls
+    return chatId.replace(/^chat_/, '');
+  }
+
+  /**
    * Register event listener
    * @param {string} event - Event name
    * @param {Function} callback - Callback function
@@ -186,7 +198,9 @@ export class ChatService {
     }
 
     try {
-      const response = await fetch(`https://api.retellai.com/v2/get-chat/${this.chatId}`, {
+      // Clean chat_id before making API call (remove 'chat_' prefix if present)
+      const cleanId = this._cleanChatId(this.chatId);
+      const response = await fetch(`https://api.retellai.com/v2/get-chat/${cleanId}`, {
         method: 'GET',
         headers: {
           'X-Retell-API-Key': CONFIG.publicKey
@@ -317,7 +331,9 @@ export class ChatService {
     }
 
     try {
-      const response = await fetch(`https://api.retellai.com/v2/end-chat/${this.chatId}`, {
+      // Clean chat_id before making API call (remove 'chat_' prefix if present)
+      const cleanId = this._cleanChatId(this.chatId);
+      const response = await fetch(`https://api.retellai.com/v2/end-chat/${cleanId}`, {
         method: 'POST',
         headers: {
           'X-Retell-API-Key': CONFIG.publicKey
