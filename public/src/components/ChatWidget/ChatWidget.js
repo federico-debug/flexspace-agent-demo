@@ -15,6 +15,7 @@ export class ChatWidget {
     this.isProcessing = false;
     this.startersContainer = null;
     this.startersComponent = null;
+    this.startersShown = false; // Flag to track if starters were already shown
   }
 
   /**
@@ -252,8 +253,8 @@ export class ChatWidget {
     `;
     this.messagesContainer.appendChild(msgElement);
     
-    // Show starters after first bot message if not already shown
-    if (this.startersComponent && !this.startersContainer) {
+    // Show starters after first bot message only if never shown before
+    if (this.startersComponent && !this.startersShown) {
       this.renderStarters();
     }
     
@@ -342,11 +343,12 @@ export class ChatWidget {
    * Render and append starters to messages container
    */
   renderStarters() {
-    if (this.startersComponent && !this.startersContainer) {
+    if (this.startersComponent && !this.startersContainer && !this.startersShown) {
       this.startersContainer = this.startersComponent.render();
       this.startersContainer.style.padding = '24px 0';
       this.startersContainer.style.marginTop = '8px';
       this.messagesContainer.appendChild(this.startersContainer);
+      this.startersShown = true; // Mark as shown
     }
   }
 
@@ -376,6 +378,7 @@ export class ChatWidget {
     if (this.messagesContainer) {
       this.messagesContainer.innerHTML = '';
       this.startersContainer = null; // Reset starters
+      this.startersShown = false; // Reset flag to allow starters again
       // Starters will reappear when agent sends first message
     }
   }
