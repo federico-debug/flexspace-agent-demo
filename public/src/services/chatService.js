@@ -16,18 +16,6 @@ export class ChatService {
   }
 
   /**
-   * Clean chat ID by removing 'chat_' prefix if present
-   * @param {string} chatId - Chat ID to clean
-   * @returns {string} Cleaned chat ID
-   * @private
-   */
-  _cleanChatId(chatId) {
-    if (!chatId) return null;
-    // Remove 'chat_' prefix if present for API calls
-    return chatId.replace(/^chat_/, '');
-  }
-
-  /**
    * Register event listener
    * @param {string} event - Event name
    * @param {Function} callback - Callback function
@@ -198,21 +186,11 @@ export class ChatService {
     }
 
     try {
-      // Clean chat_id before making API call (remove 'chat_' prefix if present)
-      const cleanId = this._cleanChatId(this.chatId);
-      const response = await fetch(`https://api.retellai.com/v2/get-chat/${cleanId}`, {
+      const response = await fetch(`/api/get-chat?chat_id=${this.chatId}`, {
         method: 'GET',
-        headers: {
-          'X-Retell-API-Key': CONFIG.publicKey
-        }
       });
 
       if (!response.ok) {
-        // If chat not found (404), it means chat was deleted/ended
-        // This is expected and not an error - chat may have been auto-closed
-        if (response.status === 404) {
-          return { status: 'ended', ended: true, chat_status: 'ended' };
-        }
         throw new Error('Failed to get chat details');
       }
 
@@ -331,13 +309,14 @@ export class ChatService {
     }
 
     try {
-      // Clean chat_id before making API call (remove 'chat_' prefix if present)
-      const cleanId = this._cleanChatId(this.chatId);
-      const response = await fetch(`https://api.retellai.com/v2/end-chat/${cleanId}`, {
+      const response = await fetch('/api/end-chat', {
         method: 'POST',
         headers: {
-          'X-Retell-API-Key': CONFIG.publicKey
-        }
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          chat_id: this.chatId
+        })
       });
 
       if (!response.ok) {
