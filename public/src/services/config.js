@@ -19,10 +19,7 @@ export const CONFIG = {
   chatStarters: [
     'What services do you offer?',
     'How much per pallet?',
-    'Where are your warehouses?',
-    'Can I tour the facility?',
-    'Do you offer delivery?',
-    'How fast can I move in?'
+    'Where are your warehouses?'
   ],
 
   // Deprecated (for backward compatibility)
