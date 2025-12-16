@@ -346,6 +346,35 @@
   }
 }
 
+/* Starters inside chat widget */
+.chat-messages .example-questions {
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.chat-messages .example-questions-title {
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.chat-messages .question-chips {
+  justify-content: flex-start;
+}
+
+.chat-messages .question-chip {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.chat-messages .question-chip:hover {
+  background: #f9fafb;
+  border-color: #000000;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .chat-widget {

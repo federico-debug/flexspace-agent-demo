@@ -3,6 +3,7 @@
  * Chat interface for text-based conversations with Retell AI
  */
 import { CONFIG } from '../../services/config.js';
+import { ExampleQuestions } from '../ExampleQuestions/ExampleQuestions.js';
 
 export class ChatWidget {
   constructor(chatService) {
@@ -12,6 +13,8 @@ export class ChatWidget {
     this.inputField = null;
     this.sendButton = null;
     this.isProcessing = false;
+    this.startersContainer = null;
+    this.startersComponent = null;
   }
 
   /**
@@ -39,6 +42,17 @@ export class ChatWidget {
 
     // ❌ QUITAMOS EL WELCOME HARDCODEADO
     // this.addWelcomeMessage();
+
+    // Starters (shown when no messages)
+    if (CONFIG.chatStarters && CONFIG.chatStarters.length > 0) {
+      this.startersComponent = new ExampleQuestions(
+        CONFIG.chatStarters,
+        (question) => this.handleStarterClick(question)
+      );
+      this.startersContainer = this.startersComponent.render();
+      this.startersContainer.style.padding = '24px';
+      this.messagesContainer.appendChild(this.startersContainer);
+    }
 
     // Input container
     const inputContainer = document.createElement('div');
@@ -134,12 +148,47 @@ export class ChatWidget {
   }
 
   /**
+   * Handle starter button click
+   * @param {string} question - Starter question text
+   */
+  async handleStarterClick(question) {
+    if (this.isProcessing) return;
+
+    // Hide starters immediately
+    this.hideStarters();
+    
+    // Add user message to UI
+    this.addUserMessage(question);
+    
+    // Set processing state
+    this.setProcessing(true);
+
+    try {
+      // Create chat if needed
+      if (!this.chatService.isActiveChat()) {
+        console.log('🟢 Creating chat from starter...');
+        await this.chatService.createChat();
+      }
+
+      // Send message
+      await this.chatService.sendMessage(question);
+    } catch (error) {
+      console.error('Error sending starter message:', error);
+      this.showError('Failed to send message. Please try again.');
+      this.setProcessing(false);
+    }
+  }
+
+  /**
    * Handle send message
    */
   async handleSendMessage() {
     const message = this.inputField.value.trim();
 
     if (!message || this.isProcessing) return;
+
+    // Hide starters if first message
+    this.hideStarters();
 
     // Add user message to UI
     this.addUserMessage(message);
@@ -287,11 +336,36 @@ export class ChatWidget {
   }
 
   /**
+   * Hide starters container
+   */
+  hideStarters() {
+    if (this.startersContainer) {
+      this.startersContainer.style.display = 'none';
+    }
+  }
+
+  /**
+   * Show starters container
+   */
+  showStarters() {
+    if (this.startersContainer) {
+      this.startersContainer.style.display = 'block';
+    }
+  }
+
+  /**
    * Clear all messages from the chat
    */
   clearMessages() {
     if (this.messagesContainer) {
       this.messagesContainer.innerHTML = '';
+      
+      // Re-add starters container
+      if (this.startersComponent && CONFIG.chatStarters && CONFIG.chatStarters.length > 0) {
+        this.startersContainer = this.startersComponent.render();
+        this.startersContainer.style.padding = '24px';
+        this.messagesContainer.appendChild(this.startersContainer);
+      }
     }
   }
 

@@ -16,6 +16,14 @@ export const CONFIG = {
   chatTitle: 'Chat with Lauren AI',
   chatThemeColor: '#000000',
   chatAutoOpen: false,
+  chatStarters: [
+    'What services do you offer?',
+    'How much per pallet?',
+    'Where are your warehouses?',
+    'Can I tour the facility?',
+    'Do you offer delivery?',
+    'How fast can I move in?'
+  ],
 
   // Deprecated (for backward compatibility)
   agentId: 'agent_55e1518cb129b891acf4d2d7b0',
