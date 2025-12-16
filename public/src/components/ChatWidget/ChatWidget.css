@@ -346,32 +346,40 @@
   }
 }
 
-/* Starters inside chat widget */
-.chat-messages .example-questions {
-  margin: 0 auto;
+/* Fixed starters container above input */
+.chat-starters-fixed {
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  max-height: 120px;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.chat-starters-fixed .example-questions {
+  margin: 0;
   max-width: 100%;
 }
 
-.chat-messages .example-questions-title {
-  text-align: center;
-  color: #6b7280;
-  font-size: 13px;
-  margin-bottom: 16px;
+.chat-starters-fixed .example-questions-title {
+  display: none; /* Hide "Try asking:" title in fixed position */
 }
 
-.chat-messages .question-chips {
+.chat-starters-fixed .question-chips {
   justify-content: flex-start;
+  gap: 8px;
 }
 
-.chat-messages .question-chip {
+.chat-starters-fixed .question-chip {
   background: #ffffff;
   color: #1f2937;
   border: 1px solid #e5e7eb;
-  font-size: 14px;
+  font-size: 13px;
+  padding: 8px 14px;
 }
 
-.chat-messages .question-chip:hover {
-  background: #f9fafb;
+.chat-starters-fixed .question-chip:hover {
+  background: #000000;
+  color: #ffffff;
   border-color: #000000;
 }
 

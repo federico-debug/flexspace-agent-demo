@@ -16,6 +16,7 @@ export class ChatWidget {
     this.startersContainer = null;
     this.startersComponent = null;
     this.startersShown = false; // Flag to track if starters were already shown
+    this.startersFixedContainer = null; // Fixed container for starters above input
   }
 
   /**
@@ -52,6 +53,11 @@ export class ChatWidget {
       );
     }
 
+    // Fixed container for starters (above input)
+    this.startersFixedContainer = document.createElement('div');
+    this.startersFixedContainer.className = 'chat-starters-fixed';
+    this.startersFixedContainer.style.display = 'none'; // Hidden initially
+
     // Input container
     const inputContainer = document.createElement('div');
     inputContainer.className = 'chat-input-container';
@@ -75,6 +81,7 @@ export class ChatWidget {
 
     widget.appendChild(header);
     widget.appendChild(this.messagesContainer);
+    widget.appendChild(this.startersFixedContainer); // Fixed starters above input
     widget.appendChild(inputContainer);
 
     this.element = widget;
@@ -102,6 +109,11 @@ export class ChatWidget {
     this.inputField.addEventListener('input', () => {
       this.inputField.style.height = 'auto';
       this.inputField.style.height = Math.min(this.inputField.scrollHeight, 120) + 'px';
+      
+      // Hide starters when user starts typing
+      if (this.inputField.value.trim().length > 0) {
+        this.hideStarters();
+      }
     });
 
     // Chat service events
@@ -340,14 +352,21 @@ export class ChatWidget {
   }
 
   /**
-   * Render and append starters to messages container
+   * Render and append starters to fixed container
    */
   renderStarters() {
-    if (this.startersComponent && !this.startersContainer && !this.startersShown) {
+    if (this.startersComponent && !this.startersShown && this.startersFixedContainer) {
+      // Clear previous if any
+      this.startersFixedContainer.innerHTML = '';
+      
+      // Render starters
       this.startersContainer = this.startersComponent.render();
-      this.startersContainer.style.padding = '24px 0';
-      this.startersContainer.style.marginTop = '8px';
-      this.messagesContainer.appendChild(this.startersContainer);
+      this.startersContainer.style.padding = '16px 24px';
+      
+      // Add to fixed container
+      this.startersFixedContainer.appendChild(this.startersContainer);
+      this.startersFixedContainer.style.display = 'block'; // Show container
+      
       this.startersShown = true; // Mark as shown
     }
   }
@@ -356,10 +375,11 @@ export class ChatWidget {
    * Hide and remove starters container
    */
   hideStarters() {
-    if (this.startersContainer) {
-      this.startersContainer.remove();
-      this.startersContainer = null; // Mark as removed
+    if (this.startersFixedContainer) {
+      this.startersFixedContainer.style.display = 'none';
+      this.startersFixedContainer.innerHTML = '';
     }
+    this.startersContainer = null;
   }
 
   /**
@@ -377,8 +397,8 @@ export class ChatWidget {
   clearMessages() {
     if (this.messagesContainer) {
       this.messagesContainer.innerHTML = '';
-      this.startersContainer = null; // Reset starters
       this.startersShown = false; // Reset flag to allow starters again
+      this.hideStarters(); // Hide starters
       // Starters will reappear when agent sends first message
     }
   }
