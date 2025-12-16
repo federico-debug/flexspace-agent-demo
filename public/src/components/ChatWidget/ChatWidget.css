@@ -348,10 +348,8 @@
 
 /* Fixed starters container above input */
 .chat-starters-fixed {
-  border-top: 1px solid #e5e7eb;
-  background: #f9fafb;
-  max-height: 120px;
-  overflow-y: auto;
+  background: #ffffff;
+  padding: 16px 24px;
   transition: all 0.3s ease;
 }
 
@@ -361,26 +359,36 @@
 }
 
 .chat-starters-fixed .example-questions-title {
-  display: none; /* Hide "Try asking:" title in fixed position */
+  text-align: left;
+  color: #6b7280;
+  font-size: 12px;
+  margin-bottom: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .chat-starters-fixed .question-chips {
   justify-content: flex-start;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .chat-starters-fixed .question-chip {
-  background: #ffffff;
+  background: #f3f4f6;
   color: #1f2937;
   border: 1px solid #e5e7eb;
-  font-size: 13px;
-  padding: 8px 14px;
+  font-size: 14px;
+  padding: 10px 16px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
 }
 
 .chat-starters-fixed .question-chip:hover {
   background: #000000;
   color: #ffffff;
   border-color: #000000;
+  transform: translateY(-1px);
 }
 
 /* Responsive */

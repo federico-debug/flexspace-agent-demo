@@ -361,7 +361,6 @@ export class ChatWidget {
       
       // Render starters
       this.startersContainer = this.startersComponent.render();
-      this.startersContainer.style.padding = '16px 24px';
       
       // Add to fixed container
       this.startersFixedContainer.appendChild(this.startersContainer);
