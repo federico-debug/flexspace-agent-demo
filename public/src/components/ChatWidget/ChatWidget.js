@@ -362,7 +362,7 @@ export class ChatWidget {
   }
 
   /**
-   * Format message text - make links clickable and preserve formatting
+   * Format message text - embed Outlook calendars and make links clickable
    * @param {string} text - Message text
    * @returns {string} Formatted HTML
    */
@@ -370,17 +370,75 @@ export class ChatWidget {
     // First escape HTML to prevent XSS
     const escaped = this.escapeHtml(text);
     
-    // URL regex pattern - matches http://, https://, and www. URLs
-    const urlPattern = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
+    // First, detect and replace Outlook Calendar embeds
+    let formatted = this.replaceOutlookEmbeds(escaped);
     
-    // Replace URLs with clickable links
-    const formatted = escaped.replace(urlPattern, (url) => {
+    // Then, handle remaining URLs as regular links
+    formatted = this.replaceRegularLinks(formatted);
+    
+    return formatted;
+  }
+
+  /**
+   * Detect and replace Outlook Calendar URLs with embedded iframes
+   * @param {string} text - Escaped text
+   * @returns {string} Text with Outlook embeds
+   */
+  replaceOutlookEmbeds(text) {
+    // Pattern to match Outlook "bookwithme" URLs
+    const outlookPattern = /(https?:\/\/outlook\.office\.com\/bookwithme\/[^\s<]+)/gi;
+    
+    return text.replace(outlookPattern, (url) => {
+      return this.createOutlookEmbed(url);
+    });
+  }
+
+  /**
+   * Create HTML for embedded Outlook Calendar iframe
+   * @param {string} url - Outlook calendar URL
+   * @returns {string} HTML for embedded calendar
+   */
+  createOutlookEmbed(url) {
+    const embedId = `outlook-embed-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    return `<div class="message-embed outlook-calendar-embed" id="${embedId}">
+      <iframe 
+        src="${url}" 
+        frameborder="0" 
+        scrolling="yes"
+        allowfullscreen
+        class="outlook-embed-iframe"
+        onload="this.style.display='block'"
+        onerror="document.getElementById('${embedId}').classList.add('embed-error')">
+      </iframe>
+      <div class="embed-fallback">
+        <a href="${url}" target="_blank" rel="noopener noreferrer" class="message-link">
+          📅 Open Outlook Calendar
+        </a>
+      </div>
+    </div>`;
+  }
+
+  /**
+   * Replace regular URLs with clickable links (excluding already embedded ones)
+   * @param {string} text - Text that may contain embeds and URLs
+   * @returns {string} Text with clickable links
+   */
+  replaceRegularLinks(text) {
+    // URL regex pattern - matches http://, https://, and www. URLs
+    // But skip URLs that are already inside iframe src attributes
+    const urlPattern = /(?!<iframe[^>]*src=["'])(?!<a[^>]*href=["'])(https?:\/\/[^\s<]+|www\.[^\s<]+)(?![^<]*<\/iframe>)(?![^<]*<\/a>)/gi;
+    
+    return text.replace(urlPattern, (url) => {
+      // Skip if URL is part of an embed structure
+      if (url.includes('outlook.office.com/bookwithme')) {
+        return url;
+      }
+      
       // Add https:// if URL starts with www.
       const href = url.startsWith('www.') ? `https://${url}` : url;
       return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="message-link">${url}</a>`;
     });
-    
-    return formatted;
   }
 
   escapeHtml(text) {
