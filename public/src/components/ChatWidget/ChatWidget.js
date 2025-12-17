@@ -190,7 +190,12 @@ export class ChatWidget {
       await this.chatService.sendMessage(question);
     } catch (error) {
       console.error('Error sending starter message:', error);
-      this.showError('Failed to send message. Please try again.');
+      
+      // Don't show error if chat has ended (banner will show instead)
+      if (!error.message.includes('Chat has ended')) {
+        this.showError('Failed to send message. Please try again.');
+      }
+      
       this.setProcessing(false);
     }
   }
@@ -228,7 +233,12 @@ export class ChatWidget {
       await this.chatService.sendMessage(message);
     } catch (error) {
       console.error('Error sending message:', error);
-      this.showError('Failed to send message. Please try again.');
+      
+      // Don't show error if chat has ended (banner will show instead)
+      if (!error.message.includes('Chat has ended')) {
+        this.showError('Failed to send message. Please try again.');
+      }
+      
       this.setProcessing(false);
     }
   }

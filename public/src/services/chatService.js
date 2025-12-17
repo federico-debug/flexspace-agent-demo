@@ -117,6 +117,15 @@ export class ChatService {
 
       if (!response.ok) {
         const text = await response.text();
+        
+        // Check if error is "Chat already ended"
+        if (text.includes('Chat already ended') || text.includes('chat ended')) {
+          console.log('✅ Chat ended detected in error response');
+          this.isActive = false;
+          this.emit('chatEnded', { chatId: this.chatId, autoEnded: true });
+          throw new Error('Chat has ended');
+        }
+        
         throw new Error(text || 'Failed to send message');
       }
       
@@ -168,10 +177,31 @@ export class ChatService {
       this.messages.push(botMessage);
       this.emit('messageReceived', botMessage);
 
+      // Proactively check if chat has ended after each message
+      // This helps catch cases where the chat ended but wasn't explicitly indicated
+      setTimeout(() => {
+        if (this.isActive) {
+          this.checkIfChatEnded().catch(err => {
+            console.warn('⚠️ Error checking chat status:', err);
+          });
+        }
+      }, 500); // Small delay to allow backend to update
+
       return data;
     } catch (error) {
       console.error('❌ Error sending message:', error);
-      this.emit('error', error);
+      
+      // Check if this is a "chat ended" error
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('Chat already ended') || errorMessage.includes('chat ended')) {
+        console.log('✅ Chat ended detected in catch block');
+        this.isActive = false;
+        this.emit('chatEnded', { chatId: this.chatId, autoEnded: true });
+      } else {
+        // Only emit generic error if it's not a chat ended error
+        this.emit('error', error);
+      }
+      
       throw error;
     }
   }
