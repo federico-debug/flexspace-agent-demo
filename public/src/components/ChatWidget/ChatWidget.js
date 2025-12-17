@@ -193,7 +193,7 @@ export class ChatWidget {
       
       // Don't show error if chat has ended (banner will show instead)
       if (!error.message.includes('Chat has ended')) {
-        this.showError('Failed to send message. Please try again.');
+      this.showError('Failed to send message. Please try again.');
       }
       
       this.setProcessing(false);
@@ -236,7 +236,7 @@ export class ChatWidget {
       
       // Don't show error if chat has ended (banner will show instead)
       if (!error.message.includes('Chat has ended')) {
-        this.showError('Failed to send message. Please try again.');
+      this.showError('Failed to send message. Please try again.');
       }
       
       this.setProcessing(false);
@@ -323,17 +323,17 @@ export class ChatWidget {
     
     // Don't change disabled state if chat has ended
     if (!this.isChatEnded) {
-      this.sendButton.disabled = processing;
-      
-      // Use readOnly instead of disabled to maintain focus
-      // This prevents user input while keeping focus and cursor visible
-      this.inputField.readOnly = processing;
-      if (processing) {
-        this.inputField.style.cursor = 'not-allowed';
-      } else {
-        this.inputField.style.cursor = 'text';
-        // Ensure focus is maintained after processing ends
-        this.inputField.focus();
+    this.sendButton.disabled = processing;
+    
+    // Use readOnly instead of disabled to maintain focus
+    // This prevents user input while keeping focus and cursor visible
+    this.inputField.readOnly = processing;
+    if (processing) {
+      this.inputField.style.cursor = 'not-allowed';
+    } else {
+      this.inputField.style.cursor = 'text';
+      // Ensure focus is maintained after processing ends
+      this.inputField.focus();
       }
     }
 
@@ -426,8 +426,8 @@ export class ChatWidget {
     const embedId = `outlook-embed-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     // Outlook Calendar bookwithme URLs cannot be embedded due to CSP frame-ancestors restrictions
-    // Show a simple button to open calendar
-    return `<div class="outlook-calendar-button-wrapper" id="${embedId}"><a href="${url}" target="_blank" rel="noopener noreferrer" class="outlook-calendar-button">📅 Open Calendar</a></div>`;
+    // Show a simple button to open calendar with line break after
+    return `<div class="outlook-calendar-button-wrapper" id="${embedId}"><a href="${url}" target="_blank" rel="noopener noreferrer" class="outlook-calendar-button">📅 Open Calendar</a></div><br>`;
   }
 
   /**
