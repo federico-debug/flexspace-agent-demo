@@ -1,26 +1,31 @@
-# Outlook Calendar Embeds Feature
+# Outlook Calendar Button Feature
 
 ## Overview
-Chat messages now automatically detect and embed Outlook Calendar "bookwithme" links as interactive iframes, allowing users to book meetings directly within the chat interface.
+Chat messages now automatically detect Outlook Calendar "bookwithme" links and display them as clean, clickable buttons that open the calendar in a new tab.
 
 ## Features
 
 ### Automatic Detection
 - Detects URLs matching pattern: `https://outlook.office.com/bookwithme/...`
-- Converts them to embedded iframes automatically
+- Converts them to styled buttons automatically
 - Works for both bot and user messages
 
-### Interactive Embedding
-- Full-width iframe (100% of message width)
-- Desktop: 600px height
-- Mobile: 500px height
-- Scrollable and fully interactive
-- Users can book meetings without leaving chat
+### Simple Button Design
+- Clean blue button with calendar emoji (📅)
+- Text: "Open Calendar"
+- Opens calendar in new tab on click
+- Microsoft blue color (#0078D4)
+- Hover effects with elevation
 
-### Graceful Fallback
-- If iframe fails to load, shows a fallback link
-- Fallback displays: "📅 Open Outlook Calendar" button
-- Maintains functionality even if embedding fails
+### Why Not Iframe Embedding?
+Outlook Calendar has strict CSP (Content Security Policy) `frame-ancestors` restrictions that only allow embedding on Microsoft-owned domains:
+- `teams.cloud.microsoft`
+- `outlook.cloud.microsoft`
+- `*.office.com`
+- `outlook.office365.com`
+- `teams.microsoft.com`
+
+Other domains (including localhost, vercel.app, etc.) will be blocked by the browser. Therefore, we use a button that opens the calendar in a new tab instead.
 
 ### Link Preservation
 - Non-Outlook URLs continue to work as clickable links
@@ -71,9 +76,9 @@ Chat messages now automatically detect and embed Outlook Calendar "bookwithme" l
 
 ### Example 1: Single Outlook Link
 ```
-Agent: "Book a meeting with me: https://outlook.office.com/bookwithme/user/2d1823dc@flexspace.com?anonymous&ep=pcard"
+Agent: "Book a meeting: https://outlook.office.com/bookwithme/user/2d1823dc@flexspace.com?anonymous&ep=pcard"
 
-Result: Full calendar booking interface embedded in chat
+Result: Blue "📅 Open Calendar" button appears in chat
 ```
 
 ### Example 2: Multiple Links
@@ -81,36 +86,20 @@ Result: Full calendar booking interface embedded in chat
 Agent: "Check our website https://example.com or book here: https://outlook.office.com/bookwithme/user/123@domain.com"
 
 Result:
-- Outlook link → Embedded calendar
+- Outlook link → Blue calendar button
 - Website link → Regular clickable link
-```
-
-### Example 3: Embed Failure
-```
-If iframe fails to load:
-- Iframe hidden
-- Fallback button shown: "📅 Open Outlook Calendar"
-- User can click to open in new tab
 ```
 
 ## HTML Structure
 
 ```html
-<div class="message-embed outlook-calendar-embed" id="outlook-embed-{timestamp}-{random}">
-  <iframe 
-    src="https://outlook.office.com/bookwithme/..." 
-    frameborder="0" 
-    scrolling="yes"
-    allowfullscreen
-    class="outlook-embed-iframe"
-    onload="this.style.display='block'"
-    onerror="document.getElementById('{embedId}').classList.add('embed-error')">
-  </iframe>
-  <div class="embed-fallback">
-    <a href="{url}" target="_blank" rel="noopener noreferrer" class="message-link">
-      📅 Open Outlook Calendar
-    </a>
-  </div>
+<div class="outlook-calendar-button-wrapper" id="outlook-embed-{timestamp}-{random}">
+  <a href="https://outlook.office.com/bookwithme/..." 
+     target="_blank" 
+     rel="noopener noreferrer" 
+     class="outlook-calendar-button">
+    📅 Open Calendar
+  </a>
 </div>
 ```
 
@@ -141,35 +130,31 @@ If iframe fails to load:
 
 | Class | Purpose |
 |-------|---------|
-| `.message-embed` | Container for any embedded content |
-| `.outlook-calendar-embed` | Specific container for Outlook calendar |
-| `.outlook-embed-iframe` | The iframe element itself |
-| `.embed-fallback` | Fallback link container (hidden by default) |
-| `.embed-error` | Added to parent when iframe fails |
+| `.outlook-calendar-button-wrapper` | Container for the calendar button |
+| `.outlook-calendar-button` | The clickable button itself |
 
 ## Responsive Behavior
 
 ### Desktop (> 768px)
-- Iframe width: 100%
-- Iframe height: 600px
-- Full interactive experience
+- Button padding: 12px 24px
+- Font size: 15px
 
 ### Mobile (≤ 768px)
-- Iframe width: 100%
-- Iframe height: 500px
-- Touch-optimized interactions
-- Fallback button optimized for mobile
+- Button padding: 10px 20px
+- Font size: 14px
+- Touch-optimized tap targets
 
 ## Testing Checklist
 
 - [x] Outlook bookwithme URLs detected correctly
-- [x] Iframe embeds and loads calendar
-- [x] Fallback shows if iframe fails
+- [x] Button appears with correct styling
+- [x] Button opens calendar in new tab
 - [x] Multiple URLs in same message work
 - [x] Non-Outlook URLs still become clickable links
-- [x] XSS protection maintained
+- [x] XSS protection maintained on text portions
+- [x] HTML structure preserved for buttons
 - [x] Responsive design works on mobile
-- [x] Unique IDs prevent conflicts with multiple embeds
+- [x] Hover effects work correctly
 
 ## Future Enhancements
 
@@ -203,8 +188,13 @@ Potential improvements for future versions:
 
 ## Version History
 
-- **v1.0** (2024-12-17): Initial Outlook Calendar embed implementation
+- **v1.1** (2024-12-17): Fixed HTML rendering and simplified to button
+  - Fixed HTML processing order (embeds before escaping)
+  - Replaced iframe with simple button due to CSP restrictions
+  - Clean Microsoft-branded button design
+  - Proper text escaping while preserving HTML structure
+
+- **v1.0** (2024-12-17): Initial implementation attempt
   - Auto-detection of bookwithme URLs
-  - Interactive iframe embedding
-  - Fallback link support
-  - Responsive design
+  - Attempted iframe embedding (blocked by CSP)
+  - Complex card design (HTML rendering issues)
