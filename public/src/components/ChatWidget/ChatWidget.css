@@ -369,62 +369,36 @@
   color: #bfdbfe;
 }
 
-/* Message Embeds */
-.message-embed {
-  margin: 12px 0;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  width: 100%;
+/* Outlook Calendar Button */
+.outlook-calendar-button-wrapper {
+  display: inline-block;
+  margin: 8px 0;
 }
 
-.outlook-calendar-embed {
-  min-height: 600px;
-  position: relative;
-}
-
-.outlook-embed-iframe {
-  width: 100%;
-  height: 600px;
-  border: none;
-  display: block;
-  background: #ffffff;
-}
-
-.embed-fallback {
-  display: none;
-  padding: 16px;
-  text-align: center;
-  background: #f3f4f6;
-  border-top: 1px solid #e5e7eb;
-}
-
-.embed-fallback a {
+.outlook-calendar-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
-  background: #000000;
+  padding: 12px 24px;
+  background: #0078D4;
   color: #ffffff;
   text-decoration: none;
   border-radius: 8px;
+  font-size: 15px;
   font-weight: 600;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 120, 212, 0.2);
 }
 
-.embed-fallback a:hover {
-  background: #1a1a1a;
-  transform: translateY(-1px);
+.outlook-calendar-button:hover {
+  background: #005a9e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 120, 212, 0.4);
 }
 
-/* Show fallback if iframe fails to load */
-.outlook-calendar-embed.embed-error .embed-fallback {
-  display: block;
-}
-
-.outlook-calendar-embed.embed-error .outlook-embed-iframe {
-  display: none;
+.outlook-calendar-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 120, 212, 0.3);
 }
 
 /* Input Container */
@@ -598,17 +572,9 @@
     height: 40px;
   }
 
-  /* Outlook Calendar Embed - mobile */
-  .outlook-calendar-embed {
-    min-height: 500px;
-  }
-  
-  .outlook-embed-iframe {
-    height: 500px;
-  }
-
-  .embed-fallback a {
-    padding: 8px 16px;
+  /* Outlook Calendar Button - mobile */
+  .outlook-calendar-button {
+    padding: 10px 20px;
     font-size: 14px;
   }
 
