@@ -17,6 +17,8 @@ export class ChatWidget {
     this.startersComponent = null;
     this.startersShown = false; // Flag to track if starters were already shown
     this.startersFixedContainer = null; // Fixed container for starters above input
+    this.isChatEnded = false; // Track if conversation has ended
+    this.conversationEndedBanner = null; // Banner element for ended conversation
   }
 
   /**
@@ -126,6 +128,10 @@ export class ChatWidget {
       this.showError(error.message);
       this.setProcessing(false);
     });
+
+    this.chatService.on('chatEnded', (data) => {
+      this.handleChatEnded();
+    });
   }
 
   /**
@@ -162,7 +168,7 @@ export class ChatWidget {
    * @param {string} question - Starter question text
    */
   async handleStarterClick(question) {
-    if (this.isProcessing) return;
+    if (this.isProcessing || this.isChatEnded) return;
 
     // Hide starters immediately
     this.hideStarters();
@@ -195,7 +201,7 @@ export class ChatWidget {
   async handleSendMessage() {
     const message = this.inputField.value.trim();
 
-    if (!message || this.isProcessing) return;
+    if (!message || this.isProcessing || this.isChatEnded) return;
 
     // Hide starters if first message
     this.hideStarters();
@@ -236,7 +242,7 @@ export class ChatWidget {
     msgElement.innerHTML = `
       <div class="message-content">
         <div class="message-sender">You</div>
-        <div class="message-text">${this.escapeHtml(text)}</div>
+        <div class="message-text">${this.formatMessage(text)}</div>
       </div>
       <div class="message-avatar user-avatar">
         <span>Y</span>
@@ -260,7 +266,7 @@ export class ChatWidget {
       </div>
       <div class="message-content">
         <div class="message-sender">${CONFIG.chatBotName}</div>
-        <div class="message-text">${this.escapeHtml(text)}</div>
+        <div class="message-text">${this.formatMessage(text)}</div>
       </div>
     `;
     this.messagesContainer.appendChild(msgElement);
@@ -301,17 +307,21 @@ export class ChatWidget {
 
   setProcessing(processing) {
     this.isProcessing = processing;
-    this.sendButton.disabled = processing;
     
-    // Use readOnly instead of disabled to maintain focus
-    // This prevents user input while keeping focus and cursor visible
-    this.inputField.readOnly = processing;
-    if (processing) {
-      this.inputField.style.cursor = 'not-allowed';
-    } else {
-      this.inputField.style.cursor = 'text';
-      // Ensure focus is maintained after processing ends
-      this.inputField.focus();
+    // Don't change disabled state if chat has ended
+    if (!this.isChatEnded) {
+      this.sendButton.disabled = processing;
+      
+      // Use readOnly instead of disabled to maintain focus
+      // This prevents user input while keeping focus and cursor visible
+      this.inputField.readOnly = processing;
+      if (processing) {
+        this.inputField.style.cursor = 'not-allowed';
+      } else {
+        this.inputField.style.cursor = 'text';
+        // Ensure focus is maintained after processing ends
+        this.inputField.focus();
+      }
     }
 
     if (processing) {
@@ -341,10 +351,135 @@ export class ChatWidget {
     }, 100);
   }
 
+  /**
+   * Format message text - make links clickable and preserve formatting
+   * @param {string} text - Message text
+   * @returns {string} Formatted HTML
+   */
+  formatMessage(text) {
+    // First escape HTML to prevent XSS
+    const escaped = this.escapeHtml(text);
+    
+    // URL regex pattern - matches http://, https://, and www. URLs
+    const urlPattern = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
+    
+    // Replace URLs with clickable links
+    const formatted = escaped.replace(urlPattern, (url) => {
+      // Add https:// if URL starts with www.
+      const href = url.startsWith('www.') ? `https://${url}` : url;
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="message-link">${url}</a>`;
+    });
+    
+    return formatted;
+  }
+
   escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  /**
+   * Handle chat ended event
+   */
+  handleChatEnded() {
+    console.log('✅ Chat ended - showing conversation ended banner');
+    this.isChatEnded = true;
+    this.setInputDisabled(true);
+    this.showConversationEndedBanner();
+  }
+
+  /**
+   * Show conversation ended banner with start new conversation button
+   */
+  showConversationEndedBanner() {
+    // Remove existing banner if any
+    this.removeConversationEndedBanner();
+
+    // Create banner element
+    this.conversationEndedBanner = document.createElement('div');
+    this.conversationEndedBanner.className = 'conversation-ended-banner';
+    this.conversationEndedBanner.innerHTML = `
+      <div class="conversation-ended-content">
+        <div class="conversation-ended-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"></path>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+          </svg>
+        </div>
+        <div class="conversation-ended-text">
+          <div class="conversation-ended-title">Conversation Ended</div>
+          <div class="conversation-ended-subtitle">This conversation has been completed</div>
+        </div>
+        <button class="start-new-conversation-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          Start New Conversation
+        </button>
+      </div>
+    `;
+
+    // Add to messages container
+    this.messagesContainer.appendChild(this.conversationEndedBanner);
+
+    // Add click handler for the button
+    const startNewBtn = this.conversationEndedBanner.querySelector('.start-new-conversation-btn');
+    startNewBtn.addEventListener('click', () => this.handleStartNewConversation());
+
+    this.scrollToBottom();
+  }
+
+  /**
+   * Remove conversation ended banner
+   */
+  removeConversationEndedBanner() {
+    if (this.conversationEndedBanner) {
+      this.conversationEndedBanner.remove();
+      this.conversationEndedBanner = null;
+    }
+  }
+
+  /**
+   * Handle start new conversation button click
+   */
+  async handleStartNewConversation() {
+    console.log('🔄 Starting new conversation...');
+    
+    // Clear UI
+    this.clearMessages();
+    this.removeConversationEndedBanner();
+    
+    // Reset state
+    this.isChatEnded = false;
+    this.setInputDisabled(false);
+    
+    // Reset chat service
+    this.chatService.reset();
+    this.chatService.shouldResetChat = true;
+    
+    // Send initial greeting to start new conversation
+    await this.sendInitialGreeting();
+  }
+
+  /**
+   * Set input field disabled state
+   * @param {boolean} disabled - Whether to disable input
+   */
+  setInputDisabled(disabled) {
+    this.inputField.disabled = disabled;
+    this.sendButton.disabled = disabled;
+    
+    if (disabled) {
+      this.inputField.placeholder = 'Conversation ended';
+      this.inputField.style.cursor = 'not-allowed';
+      this.inputField.style.opacity = '0.6';
+    } else {
+      this.inputField.placeholder = `Message ${CONFIG.chatBotName}...`;
+      this.inputField.style.cursor = 'text';
+      this.inputField.style.opacity = '1';
+    }
   }
 
   mount(parent) {
@@ -398,6 +533,8 @@ export class ChatWidget {
       this.messagesContainer.innerHTML = '';
       this.startersShown = false; // Reset flag to allow starters again
       this.hideStarters(); // Hide starters
+      this.removeConversationEndedBanner(); // Remove ended banner
+      this.isChatEnded = false; // Reset ended state
       // Starters will reappear when agent sends first message
     }
   }
