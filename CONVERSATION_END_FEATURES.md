@@ -202,3 +202,10 @@ const formatted = text.replace(urlPattern, (url) => {
   - Start new conversation functionality
   - Input disabled state
   - Clickable links in messages
+
+
+
+
+
+
+

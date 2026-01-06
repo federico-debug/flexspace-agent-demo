@@ -199,7 +199,7 @@ export class ChatService {
         this.emit('chatEnded', { chatId: this.chatId, autoEnded: true });
       } else {
         // Only emit generic error if it's not a chat ended error
-        this.emit('error', error);
+      this.emit('error', error);
       }
       
       throw error;

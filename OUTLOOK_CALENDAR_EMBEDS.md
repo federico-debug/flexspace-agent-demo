@@ -198,3 +198,10 @@ Potential improvements for future versions:
   - Auto-detection of bookwithme URLs
   - Attempted iframe embedding (blocked by CSP)
   - Complex card design (HTML rendering issues)
+
+
+
+
+
+
+

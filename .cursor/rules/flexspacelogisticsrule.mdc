@@ -1,0 +1,526 @@
+---
+alwaysApply: true
+---
+
+
+# RetellAI Chatbot Project - Cursor Rules
+
+## Project Overview
+This is a web-based chatbot implementation using RetellAI's Chat API. The project uses vanilla JavaScript (ES6+) with React components for the UI, and Vercel serverless functions for backend API calls.
+
+## Core Technologies
+- **Frontend**: Vanilla JavaScript (ES6+), React components
+- **Backend**: Vercel Serverless Functions (Node.js)
+- **API**: RetellAI Chat API
+- **Styling**: CSS (vanilla, no frameworks)
+
+## Project Structure
+```
+/api
+  ├── create-chat.js        # Vercel function: creates new chat sessions
+  ├── send-message.js       # Vercel function: sends messages to RetellAI
+/public
+  /src
+    /components
+      ├── ChatWidget/       # Main chat interface component
+      ├── FloatingChatButton/ # Toggle button for chat
+      └── [other components]
+    /services
+      ├── chatService.js    # Chat logic & RetellAI integration
+      ├── retellClient.js   # RetellAI Web Client (voice calls)
+      ├── config.js         # Configuration constants
+    /utils                  # Helper functions
+    /styles                 # CSS files
+  ├── app.js                # Main application entry
+  ├── server.js             # Development server
+  └── index.html            # Main HTML file
+```
+
+## Code Style & Standards
+
+### General Principles
+1. **Write clean, readable, self-documenting code**
+2. **Follow DRY (Don't Repeat Yourself)**
+3. **Use meaningful variable and function names**
+4. **Keep functions small and focused (single responsibility)**
+5. **Use async/await over Promise chains**
+6. **Always handle errors gracefully**
+
+### JavaScript Standards
+- Use ES6+ features (const/let, arrow functions, destructuring, spread operator)
+- Use `const` by default, `let` only when reassignment is needed
+- Never use `var`
+- Use template literals for string interpolation
+- Prefer arrow functions for callbacks and short functions
+- Use default parameters when appropriate
+- Use object/array destructuring when it improves readability
+
+### Naming Conventions
+- **Variables & Functions**: camelCase (`chatService`, `sendMessage`)
+- **Classes**: PascalCase (`ChatService`, `RetellClientService`)
+- **Constants**: UPPER_SNAKE_CASE (`CONFIG`, `API_URL`)
+- **Private methods**: prefix with underscore (`_handleError`)
+- **Boolean variables**: use is/has/should prefixes (`isActive`, `hasError`, `shouldRetry`)
+- **Event handlers**: prefix with "on" or "handle" (`onClick`, `handleSubmit`)
+
+### Comments & Documentation
+- **Language**: All comments and documentation in English
+- **Style**: Use JSDoc for classes and public methods
+- **Inline comments**: Only when logic is complex or non-obvious
+- **Keep comments updated**: Remove outdated comments immediately
+
+```javascript
+/**
+ * Send a message to the chat agent and get response
+ * @param {string} message - User message to send
+ * @param {boolean} skipUserMessage - Skip adding user message to history
+ * @returns {Promise<Object>} Chat completion response
+ * @throws {Error} If no active chat session or API fails
+ */
+async sendMessage(message, skipUserMessage = false) {
+  // Implementation
+}
+```
+
+### Error Handling
+- **Always** use try-catch blocks for async operations
+- Log errors with descriptive emoji prefixes (❌, ⚠️, ℹ️)
+- Emit error events for service classes
+- Provide user-friendly error messages
+- Never expose sensitive data in error messages
+
+```javascript
+try {
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.status}`);
+  }
+  return await response.json();
+} catch (error) {
+  console.error('❌ Error fetching data:', error);
+  this.emit('error', error);
+  throw error;
+}
+```
+
+### Async/Await Patterns
+- Use async/await consistently, not Promise chains
+- Handle errors at appropriate levels
+- Use Promise.all() for parallel operations
+- Never use .then() unless specifically needed
+
+```javascript
+// ✅ Good
+async function fetchData() {
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+// ❌ Avoid
+function fetchData() {
+  return fetch(url)
+    .then(response => response.json())
+    .then(data => processData(data))
+    .catch(error => handleError(error));
+}
+```
+
+## RetellAI Integration Patterns
+
+### Chat Service Architecture
+The `ChatService` class manages all chat interactions:
+- **Session management**: Create, track, and end chat sessions
+- **Message handling**: Send user messages, receive agent responses
+- **Event system**: Emit events for UI updates
+- **Variable extraction**: Store user data from conversations
+- **State tracking**: Monitor chat status (active/ended)
+
+### Key RetellAI API Endpoints
+1. **POST /create-chat**: Initialize new chat session (returns `chat_id`)
+2. **POST /create-chat-completion**: Send message and get response
+3. **GET /get-chat/:chat_id**: Retrieve chat details and status
+4. **POST /end-chat/:chat_id**: Manually end chat session
+
+### API Response Handling
+RetellAI responses contain:
+- `messages[]`: Conversation history with role "agent" or "user"
+- `chat_status`: "ongoing" or "ended"
+- `variables`: Extracted user data (name, email, etc.)
+- `chat_analysis`: Summary, sentiment, success indicators
+
+Always check multiple possible response formats:
+```javascript
+// Extract agent message from various possible formats
+let botContent = '';
+if (Array.isArray(data.messages)) {
+  const lastAgentMsg = [...data.messages]
+    .reverse()
+    .find(msg => msg.role === 'agent' && msg.content);
+  if (lastAgentMsg) {
+    botContent = lastAgentMsg.content;
+  }
+} else if (typeof data.response === 'string') {
+  botContent = data.response;
+} else if (typeof data.output_text === 'string') {
+  botContent = data.output_text;
+}
+```
+
+### Event-Driven Architecture
+Services should use event emitters for loose coupling:
+```javascript
+// In service
+this.emit('messageReceived', botMessage);
+this.emit('chatEnded', { chatId: this.chatId });
+this.emit('error', error);
+
+// In component
+chatService.on('messageReceived', (message) => {
+  updateUI(message);
+});
+```
+
+## React Component Guidelines
+
+### Component Structure
+- Keep components focused and single-purpose
+- Extract reusable logic into custom hooks or utilities
+- Use functional components with hooks
+- Minimize prop drilling (consider context if needed)
+- Co-locate component styles with components
+
+### Component Best Practices
+```javascript
+// ✅ Good: Clear, focused component
+const MessageBubble = ({ message, isAgent }) => {
+  const className = isAgent ? 'message agent' : 'message user';
+  
+  return (
+    <div className={className}>
+      <p>{message.content}</p>
+      <span className="timestamp">{formatTime(message.timestamp)}</span>
+    </div>
+  );
+};
+
+// ❌ Avoid: Component doing too much
+const ChatInterface = () => {
+  // 200 lines of mixed logic
+};
+```
+
+### State Management
+- Use `useState` for local component state
+- Use `useEffect` for side effects and subscriptions
+- Clean up effects properly (return cleanup functions)
+- Keep state as close to where it's used as possible
+
+## Vercel Serverless Functions
+
+### Function Structure
+- Keep functions small and focused
+- Validate request methods first
+- Use environment variables for secrets
+- Return proper HTTP status codes
+- Handle errors gracefully
+
+```javascript
+export default async function handler(req, res) {
+  // 1. Validate method
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    // 2. Extract and validate data
+    const { agent_id, chat_id, message } = req.body;
+    if (!agent_id || !chat_id) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // 3. Call external API
+    const response = await fetch(RETELL_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RETELL_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ agent_id, chat_id, message })
+    });
+
+    // 4. Handle response
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return res.status(200).json(data);
+
+  } catch (error) {
+    console.error('❌ Function error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+```
+
+### Security Best Practices
+- **Never** expose API keys in frontend code
+- Use environment variables for all secrets
+- Validate all inputs on server side
+- Rate limit if handling public endpoints
+- Use HTTPS only
+
+## File Organization
+
+### Import Order
+1. External libraries (React, third-party packages)
+2. Internal services
+3. Internal components
+4. Utils/helpers
+5. Constants/config
+6. Styles
+
+```javascript
+// External
+import React, { useState, useEffect } from 'react';
+
+// Services
+import { ChatService } from './services/chatService.js';
+import { CONFIG } from './services/config.js';
+
+// Components
+import { MessageBubble } from './components/MessageBubble';
+
+// Utils
+import { formatTime, validateEmail } from './utils/helpers.js';
+
+// Styles
+import './styles/ChatWidget.css';
+```
+
+### File Naming
+- React components: PascalCase with .js extension (`ChatWidget.js`)
+- Services: camelCase with .js extension (`chatService.js`)
+- Utilities: camelCase with .js extension (`helpers.js`)
+- Serverless functions: kebab-case with .js extension (`create-chat.js`)
+
+## UI/UX Considerations
+
+### User Feedback
+- Show loading states during API calls
+- Display error messages clearly
+- Confirm destructive actions (end chat)
+- Auto-scroll to latest messages
+- Indicate when agent is "typing"
+
+### Accessibility
+- Use semantic HTML
+- Include ARIA labels where needed
+- Ensure keyboard navigation works
+- Maintain sufficient color contrast
+- Test with screen readers
+
+## Testing Mindset
+
+### What to Test
+- API integration points
+- Error handling paths
+- Chat state transitions
+- Message sending/receiving
+- Session lifecycle (create → active → ended)
+
+### Debugging Practices
+- Use descriptive console logs with emoji prefixes:
+  - ✅ Success operations
+  - ❌ Errors
+  - ⚠️ Warnings
+  - ℹ️ Info
+  - 🚀 Initialization
+  - 📞 Call/chat events
+  - 📝 Data extraction
+- Remove console.logs before production
+- Use browser DevTools Network tab for API debugging
+
+## Common Patterns
+
+### Singleton Pattern for Services
+```javascript
+// config.js exports single instance
+export const CONFIG = {
+  apiUrl: 'https://api.retellai.com',
+  agentId: process.env.AGENT_ID,
+  publicKey: process.env.RETELL_PUBLIC_KEY
+};
+
+// chatService.js - instantiate once in app.js
+const chatService = new ChatService();
+```
+
+### Loading States
+```javascript
+const [isLoading, setIsLoading] = useState(false);
+const [error, setError] = useState(null);
+
+async function handleAction() {
+  setIsLoading(true);
+  setError(null);
+  
+  try {
+    await performAction();
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+}
+```
+
+### Conditional Rendering
+```javascript
+// ✅ Good: Clear and readable
+{isLoading && <LoadingSpinner />}
+{error && <ErrorMessage message={error} />}
+{messages.length === 0 ? <EmptyState /> : <MessageList messages={messages} />}
+
+// ❌ Avoid: Nested ternaries
+{isLoading ? <Spinner /> : error ? <Error /> : data ? <Content /> : <Empty />}
+```
+
+## Performance Considerations
+
+- Debounce user input when appropriate
+- Memoize expensive computations
+- Lazy load components when possible
+- Minimize re-renders with proper key props
+- Use event delegation for lists
+- Clean up event listeners and timers
+
+## Git Commit Guidelines
+
+- Use clear, descriptive commit messages
+- Start with action verb (Add, Fix, Update, Remove, Refactor)
+- Keep first line under 50 characters
+- Add detailed description if needed
+
+```
+Fix: Handle chat end status in API response
+
+- Check multiple status fields for chat end detection
+- Emit chatEnded event when status is 'ended'
+- Update local state to prevent further messages
+```
+
+## When Modifying Code
+
+### Before Making Changes
+1. **Understand the existing pattern** - Don't introduce inconsistencies
+2. **Check for similar implementations** - Reuse existing patterns
+3. **Consider side effects** - Think about what else might break
+4. **Read the RetellAI docs** - Verify API behavior if unsure
+
+### During Development
+1. **Test incrementally** - Don't write too much before testing
+2. **Handle edge cases** - What if API fails? What if chat ends?
+3. **Update comments** - Keep documentation in sync with code
+4. **Follow the established patterns** - Don't reinvent the wheel
+
+### After Changes
+1. **Test all affected flows** - Not just the happy path
+2. **Check console for errors** - Clean up any warnings
+3. **Verify browser compatibility** - Test in target browsers
+4. **Review your own code** - Read it as if you're reviewing someone else's PR
+
+## Red Flags to Avoid
+
+🚫 **Never do these:**
+- Expose API keys in frontend code
+- Use `var` instead of `const`/`let`
+- Ignore error handling
+- Leave console.logs in production code
+- Use `.then()` chains when async/await is cleaner
+- Nest components more than 3 levels deep
+- Create "god objects" that do everything
+- Forget to clean up event listeners
+- Hard-code values that should be configurable
+- Mix Spanish and English in code/comments
+
+## Quick Reference
+
+### Creating New Components
+```javascript
+/**
+ * ComponentName
+ * Brief description of what it does
+ */
+import React from 'react';
+import './ComponentName.css';
+
+export const ComponentName = ({ prop1, prop2 }) => {
+  // State and logic here
+  
+  return (
+    <div className="component-name">
+      {/* JSX here */}
+    </div>
+  );
+};
+```
+
+### Creating New Services
+```javascript
+/**
+ * ServiceName
+ * Brief description of service purpose
+ */
+export class ServiceName {
+  constructor() {
+    this.listeners = {};
+    // Initialize state
+  }
+
+  /**
+   * Method description
+   * @param {Type} param - Description
+   * @returns {Type} Description
+   */
+  async methodName(param) {
+    try {
+      // Implementation
+    } catch (error) {
+      console.error('❌ Error in methodName:', error);
+      this.emit('error', error);
+      throw error;
+    }
+  }
+
+  on(event, callback) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(callback);
+  }
+
+  emit(event, data) {
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(callback => callback(data));
+    }
+  }
+}
+```
+
+---
+
+## Final Notes
+
+This project prioritizes:
+1. **Reliability**: Robust error handling and state management
+2. **Maintainability**: Clean, well-documented code
+3. **User Experience**: Smooth interactions and clear feedback
+4. **Best Practices**: Following industry standards for JavaScript and React
+
+When in doubt, ask yourself: "Is this code easy to understand, maintain, and extend?" If the answer is no, refactor it.
