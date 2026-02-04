@@ -42,7 +42,6 @@ export default async function handler(req, res) {
       // If chat not found (404), return ended status
       // This is expected when chat was auto-closed by Retell
       if (response.status === 404) {
-        console.log('⚠️ Chat not found (404), treating as ended:', chat_id);
         return res.status(200).json({ 
           status: 'ended', 
           ended: true, 
@@ -54,7 +53,6 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    console.log('✅ Chat details retrieved:', chat_id);
     return res.status(200).json(data);
   } catch (e) {
     console.error('❌ Error getting chat:', e);

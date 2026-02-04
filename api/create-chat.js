@@ -1,11 +1,13 @@
 /**
  * Vercel Serverless Function
  * Creates a new chat session with Retell AI
+ *
+ * NOTE: Each request creates a NEW chat to avoid mixing conversations
+ * between different users (no server-side caching of chat IDs)
  */
 
 const RETELL_API_KEY = process.env.RETELL_API_KEY;
-
-let currentChatId = null; // ✅ memoria en caliente de Vercel
+const RETELL_AGENT_ID = process.env.RETELL_AGENT_ID;
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -27,46 +29,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Check if we should reset chat (when chat ended)
-    const { agent_id, reset_chat } = req.body;
-    
-    if (reset_chat) {
-      console.log('🔄 Resetting chat due to reset_chat flag');
-      currentChatId = null;
+    // Use agent_id from environment (secure)
+    const agent_id = RETELL_AGENT_ID;
+
+    if (!agent_id) {
+      return res.status(500).json({ error: 'Missing RETELL_AGENT_ID env variable' });
     }
 
-    // If we have a current chat, verify it's still active before reusing
-    if (currentChatId && !reset_chat) {
-      try {
-        const checkResponse = await fetch(`https://api.retellai.com/get-chat/${currentChatId}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${RETELL_API_KEY}`,
-          },
-        });
-
-        if (checkResponse.ok) {
-          const chatData = await checkResponse.json();
-          // Only reuse if chat is still ongoing
-          if (chatData.chat_status === 'ongoing' || chatData.status === 'ongoing') {
-            console.log('♻️ Reusing existing active chat:', currentChatId);
-            return res.status(200).json({ chat_id: currentChatId });
-          } else {
-            console.log('⚠️ Existing chat ended, creating new one');
-            currentChatId = null;
-          }
-        } else {
-          // Chat not found or ended, clear it
-          console.log('⚠️ Existing chat not found/ended, creating new one');
-          currentChatId = null;
-        }
-      } catch (checkError) {
-        // If check fails, clear and create new
-        console.log('⚠️ Error checking chat status, creating new one');
-        currentChatId = null;
-      }
+    if (!RETELL_API_KEY) {
+      return res.status(500).json({ error: 'Missing RETELL_API_KEY env variable' });
     }
 
+    // Always create a NEW chat per request
+    // This prevents mixing conversations between different users
     const response = await fetch('https://api.retellai.com/create-chat', {
       method: 'POST',
       headers: {
@@ -82,11 +57,6 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-
-    currentChatId = data.chat_id; // ✅ SE GUARDA EL CHAT
-
-    console.log('✅ New chat created:', currentChatId);
-
     return res.status(200).json(data);
   } catch (e) {
     console.error('❌ Error creating chat:', e);

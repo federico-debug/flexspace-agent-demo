@@ -45,13 +45,13 @@ export class ChatService {
    */
   async createChat(resetChat = false) {
     try {
+      // NOTE: agent_id is now handled server-side for security
       const response = await fetch('/api/create-chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          agent_id: CONFIG.chatAgentId,
           reset_chat: resetChat
         })
       });
@@ -103,13 +103,13 @@ export class ChatService {
       }
 
       // Send to API via serverless function
+      // NOTE: agent_id handled server-side for security
       const response = await fetch('/api/send-message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          agent_id: CONFIG.chatAgentId,
           chat_id: this.chatId,
           message: message
         })

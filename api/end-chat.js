@@ -44,7 +44,6 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    console.log('✅ Chat ended successfully:', chat_id);
     return res.status(200).json(data);
   } catch (e) {
     console.error('❌ Error ending chat:', e);

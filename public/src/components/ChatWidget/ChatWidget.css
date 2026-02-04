@@ -1,5 +1,6 @@
 /* Chat Widget Container */
 .chat-widget {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -22,11 +23,34 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .chat-header h3 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
   color: #ffffff;
+}
+
+.chat-history-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.chat-history-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .chat-status {

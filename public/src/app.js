@@ -4,7 +4,8 @@
  */
 import { ChatWidget } from './components/ChatWidget/ChatWidget.js';
 import { FloatingChatButton } from './components/FloatingChatButton/FloatingChatButton.js';
-import { ChatService } from './services/chatService.js';
+// Using ChatOrchestrator with ChatService alias for backward compatibility
+import { ChatService } from './services/ChatOrchestrator.js';
 
 class ChatApp {
   constructor() {
@@ -18,7 +19,6 @@ class ChatApp {
    * Initialize the chat application
    */
   init() {
-    console.log('💬 Chat Agent initialized');
     this.setupComponents();
     this.setupChatService();
   }
@@ -52,14 +52,9 @@ class ChatApp {
   setupChatService() {
     // When chat ends (explicitly via endChat()), check if widget is closed to clean up
     this.chatService.on('chatEnded', () => {
-      console.log('📞 Chat ended event received');
       // Only cleanup if widget is closed
       if (!this.isChatWidgetOpen) {
         this.cleanupChatConversation();
-      } else {
-        // If widget is still open, just mark that chat ended
-        // The cleanup will happen when widget is closed
-        console.log('💬 Widget still open, will cleanup when closed');
       }
     });
   }
@@ -69,7 +64,6 @@ class ChatApp {
    * Only called when conversation explicitly ended AND widget is closed
    */
   cleanupChatConversation() {
-    console.log('🧹 Cleaning up chat conversation');
     this.components.chatWidget.clearMessages();
     this.chatService.reset();
     // Force reset server-side chat cache on next creation
@@ -81,7 +75,6 @@ class ChatApp {
    * @param {boolean} isOpen - Is chat open
    */
   async toggleFloatingChat(isOpen) {
-    console.log(`💬 Floating chat ${isOpen ? 'opened' : 'closed'}`);
     this.isChatWidgetOpen = isOpen;
 
     if (isOpen) {
@@ -99,21 +92,19 @@ class ChatApp {
     } else {
       this.chatContainer.classList.remove('floating');
       this.chatContainer.style.display = 'none';
-      
+
+      // Always save to history when widget closes (if there are messages)
+      // This ensures conversations are saved even if Retell hasn't marked them as ended
+      if (this.chatService.messages && this.chatService.messages.length > 0) {
+        this.chatService.saveToHistory();
+      }
+
       // When widget closes, check if chat has ended in Retell AI
       // This detects automatic chat termination (e.g., after inactivity)
       if (this.chatService.isActiveChat()) {
         try {
-          const chatEnded = await this.chatService.checkIfChatEnded();
-          if (chatEnded) {
-            // Chat ended, cleanup will happen via chatEnded event handler
-            console.log('🧹 Chat ended automatically, cleaning up...');
-          } else {
-            // Chat still active, keep it for when widget reopens
-            console.log('💬 Chat still active, keeping conversation');
-          }
+          await this.chatService.checkIfChatEnded();
         } catch (error) {
-          console.error('❌ Error checking chat status:', error);
           // On error, assume chat is still active
         }
       }
