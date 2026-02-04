@@ -9,8 +9,60 @@
 
 body {
   font-family: var(--font-family-base);
-  background: var(--color-white);
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
   min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Page Background Branding */
+.page-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, #fafbfc 0%, #eef1f5 50%, #e8ecf1 100%);
+}
+
+.brand-container {
+  text-align: center;
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.brand-title {
+  font-size: clamp(4rem, 15vw, 12rem);
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.06);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin: 0;
+  user-select: none;
+}
+
+.brand-subtitle {
+  font-size: clamp(1.5rem, 5vw, 4rem);
+  font-weight: 300;
+  color: rgba(0, 0, 0, 0.04);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+  user-select: none;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.85;
+  }
 }
 
 /* Layout */
