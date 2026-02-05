@@ -39,6 +39,7 @@ export class ChatWidget {
     this.isChatEnded = false;
     this.isProcessing = false;
     this.conversationEndedBanner = null;
+    this.isViewingHistory = false; // Flag to ignore incoming messages when viewing history
   }
 
   /**
@@ -115,6 +116,13 @@ export class ChatWidget {
    */
   setupServiceListeners() {
     this.chatService.on('messageReceived', (message) => {
+      // Ignore messages if viewing history (prevents race conditions)
+      if (this.isViewingHistory) {
+        this.typingIndicator.hide();
+        this.setProcessing(false);
+        return;
+      }
+
       this.typingIndicator.hide();
       this.messageList.addBotMessage(message.content);
       this.setProcessing(false);
@@ -126,11 +134,20 @@ export class ChatWidget {
     });
 
     this.chatService.on('error', (error) => {
+      // Ignore errors if viewing history
+      if (this.isViewingHistory) {
+        this.setProcessing(false);
+        return;
+      }
       this.messageList.showError(error.message);
       this.setProcessing(false);
     });
 
-    this.chatService.on('chatEnded', () => this.handleChatEnded());
+    this.chatService.on('chatEnded', () => {
+      // Ignore chatEnded if viewing history
+      if (this.isViewingHistory) return;
+      this.handleChatEnded();
+    });
   }
 
   /**
@@ -200,6 +217,9 @@ export class ChatWidget {
    * Start new conversation
    */
   async handleStartNewConversation() {
+    // Reset viewing history flag to accept new messages
+    this.isViewingHistory = false;
+
     this.clearMessages();
     this.isChatEnded = false;
     this.chatInput.enable();
@@ -225,7 +245,8 @@ export class ChatWidget {
   }
 
   renderStarters() {
-    if (!this.startersComponent || this.startersShown) return;
+    // Don't show starters if chat is ended or viewing history
+    if (!this.startersComponent || this.startersShown || this.isChatEnded) return;
     this.startersFixedContainer.innerHTML = '';
     this.startersFixedContainer.appendChild(this.startersComponent.render());
     this.startersFixedContainer.style.display = 'block';
@@ -240,10 +261,20 @@ export class ChatWidget {
   }
 
   clearMessages() {
+    // Remove the ended banner explicitly if it exists
+    if (this.conversationEndedBanner && this.conversationEndedBanner.parentNode) {
+      this.conversationEndedBanner.remove();
+    }
+    this.conversationEndedBanner = null;
+
+    // Clear all messages from the list
     this.messageList.clear();
+
+    // Reset starters state
     this.startersShown = false;
     this.hideStarters();
-    this.conversationEndedBanner = null;
+
+    // Reset chat state
     this.isChatEnded = false;
   }
 
@@ -264,8 +295,18 @@ export class ChatWidget {
     // Hide history panel
     this.historyPanel.hide();
 
-    // Clear current messages
+    // IMPORTANT: Mark as viewing history to ignore pending async messages
+    this.isViewingHistory = true;
+
+    // Mark as ended FIRST to prevent starters from showing
+    this.isChatEnded = true;
+
+    // Clear current messages (will also hide starters)
     this.clearMessages();
+
+    // Re-set isChatEnded since clearMessages resets it
+    this.isChatEnded = true;
+    this.chatInput.disable();
 
     // Display the historical messages (read-only)
     chat.messages.forEach(msg => {
@@ -277,8 +318,6 @@ export class ChatWidget {
     });
 
     // Show ended banner since this is a past conversation
-    this.isChatEnded = true;
-    this.chatInput.disable();
     this.conversationEndedBanner = this.messageList.showEndedBanner(
       () => this.handleStartNewConversation()
     );
