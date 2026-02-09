@@ -34,6 +34,7 @@ export class ChatWidget {
 
     // State
     this.element = null;
+    this.welcomeScreen = null;
     this.startersFixedContainer = null;
     this.startersShown = false;
     this.isChatEnded = false;
@@ -98,11 +99,30 @@ export class ChatWidget {
       () => this.historyPanel.hide()
     );
 
+    // Welcome screen overlay
+    this.welcomeScreen = document.createElement('div');
+    this.welcomeScreen.className = 'chat-welcome-screen visible';
+    this.welcomeScreen.innerHTML = `
+      <div class="welcome-content">
+        <div class="welcome-avatar">
+          <img src="agent-avatar.png" alt="${CONFIG.chatBotName}" />
+        </div>
+        <h3 class="welcome-title">FlexSpace Logistics</h3>
+        <p class="welcome-subtitle">To chat with us, click below</p>
+        <button class="welcome-start-btn">Chat</button>
+      </div>
+    `;
+
+    this.welcomeScreen.querySelector('.welcome-start-btn').addEventListener('click', () => {
+      this.dismissWelcomeScreen();
+    });
+
     // Assemble widget
     widget.appendChild(header);
     widget.appendChild(messagesContainer);
     widget.appendChild(this.startersFixedContainer);
     widget.appendChild(inputContainer);
+    widget.appendChild(this.welcomeScreen);
     this.historyPanel.mount(widget);
 
     this.element = widget;
@@ -115,7 +135,7 @@ export class ChatWidget {
    * Setup chat service event listeners
    */
   setupServiceListeners() {
-    this.chatService.on('messageReceived', (message) => {
+    this.chatService.on('messageReceived', async (message) => {
       // Ignore messages if viewing history (prevents race conditions)
       if (this.isViewingHistory) {
         this.typingIndicator.hide();
@@ -124,7 +144,9 @@ export class ChatWidget {
       }
 
       this.typingIndicator.hide();
-      this.messageList.addBotMessage(message.content);
+
+      // Stream the message word-by-word
+      await this.messageList.addBotMessageStreaming(message.content);
       this.setProcessing(false);
 
       // Show starters after first bot message
@@ -148,6 +170,33 @@ export class ChatWidget {
       if (this.isViewingHistory) return;
       this.handleChatEnded();
     });
+  }
+
+  /**
+   * Show welcome screen if no active chat
+   */
+  showWelcomeScreen() {
+    if (this.chatService.isActiveChat() || this.isProcessing) return;
+    if (this.welcomeScreen) {
+      this.welcomeScreen.classList.add('visible');
+    }
+  }
+
+  /**
+   * Hide welcome screen without starting chat (e.g. resuming active conversation)
+   */
+  hideWelcomeScreen() {
+    if (this.welcomeScreen) {
+      this.welcomeScreen.classList.remove('visible');
+    }
+  }
+
+  /**
+   * Dismiss welcome screen and start chat
+   */
+  async dismissWelcomeScreen() {
+    this.hideWelcomeScreen();
+    await this.sendInitialGreeting();
   }
 
   /**
@@ -220,12 +269,13 @@ export class ChatWidget {
     // Reset viewing history flag to accept new messages
     this.isViewingHistory = false;
 
+    this.messageList.cancelStreaming();
     this.clearMessages();
     this.isChatEnded = false;
     this.chatInput.enable();
     this.chatService.reset();
     this.chatService.shouldResetChat = true;
-    await this.sendInitialGreeting();
+    this.showWelcomeScreen();
   }
 
   /**
@@ -328,6 +378,7 @@ export class ChatWidget {
   }
 
   destroy() {
+    this.messageList.cancelStreaming();
     if (!this.chatService.isActiveChat()) {
       this.clearMessages();
     }

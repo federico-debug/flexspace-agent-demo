@@ -59,7 +59,7 @@ export class MessageList {
     msgElement.className = 'chat-message bot-message';
     msgElement.innerHTML = `
       <div class="message-avatar">
-        <span>${CONFIG.chatBotName.charAt(0)}</span>
+        <img src="agent-avatar.png" alt="${CONFIG.chatBotName}" class="avatar-img" />
       </div>
       <div class="message-content">
         <div class="message-sender">${CONFIG.chatBotName}</div>
@@ -69,6 +69,112 @@ export class MessageList {
 
     this.container.appendChild(msgElement);
     this.scrollToBottom();
+  }
+
+  /**
+   * Add bot message with word-by-word streaming effect
+   * @param {string} text - Full message content
+   * @returns {Promise<void>} Resolves when streaming completes
+   */
+  addBotMessageStreaming(text) {
+    if (!this.container) return Promise.resolve();
+
+    const msgElement = document.createElement('div');
+    msgElement.className = 'chat-message bot-message';
+    msgElement.innerHTML = `
+      <div class="message-avatar">
+        <img src="agent-avatar.png" alt="${CONFIG.chatBotName}" class="avatar-img" />
+      </div>
+      <div class="message-content">
+        <div class="message-sender">${CONFIG.chatBotName}</div>
+        <div class="message-text"><span class="streaming-cursor"></span></div>
+      </div>
+    `;
+
+    this.container.appendChild(msgElement);
+    this.scrollToBottom();
+
+    const textEl = msgElement.querySelector('.message-text');
+    const formattedText = this.formatter.format(text);
+
+    // Split into words while preserving HTML tags
+    const words = this._splitForStreaming(formattedText);
+
+    return new Promise((resolve) => {
+      let index = 0;
+
+      const getDelay = (word) => {
+        const clean = word.replace(/<[^>]*>/g, '').trim();
+        // Long pause after sentence-ending punctuation
+        if (/[.!?]$/.test(clean)) return 280 + Math.random() * 200;
+        // Medium pause after commas, colons, semicolons
+        if (/[,:;]$/.test(clean)) return 150 + Math.random() * 100;
+        // Occasional "thinking" pause (~15% chance)
+        if (Math.random() < 0.15) return 180 + Math.random() * 120;
+        // Normal typing speed with human-like variance
+        return 35 + Math.random() * 45;
+      };
+
+      const streamNext = () => {
+        if (index >= words.length) {
+          textEl.innerHTML = formattedText;
+          this.scrollToBottom();
+          resolve();
+          return;
+        }
+
+        const partialHtml = words.slice(0, index + 1).join('');
+        textEl.innerHTML = partialHtml + '<span class="streaming-cursor"></span>';
+        const currentWord = words[index];
+        index++;
+        this.scrollToBottom();
+
+        this._streamTimer = setTimeout(streamNext, getDelay(currentWord));
+      };
+
+      streamNext();
+    });
+  }
+
+  /**
+   * Cancel any active streaming animation
+   */
+  cancelStreaming() {
+    if (this._streamTimer) {
+      clearTimeout(this._streamTimer);
+      this._streamTimer = null;
+    }
+  }
+
+  /**
+   * Split formatted HTML into streamable word chunks
+   * Preserves HTML tags as atomic units
+   * @param {string} html
+   * @returns {string[]}
+   */
+  _splitForStreaming(html) {
+    const result = [];
+    let current = '';
+    let inTag = false;
+
+    for (let i = 0; i < html.length; i++) {
+      const char = html[i];
+      if (char === '<') {
+        inTag = true;
+        current += char;
+      } else if (char === '>') {
+        inTag = false;
+        current += char;
+      } else if (!inTag && char === ' ') {
+        current += ' ';
+        result.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    if (current) result.push(current);
+    return result;
   }
 
   /**

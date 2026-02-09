@@ -33,7 +33,7 @@ export class TypingIndicator {
     this.element.className = 'chat-message bot-message typing-indicator';
     this.element.innerHTML = `
       <div class="message-avatar">
-        <span>${CONFIG.chatBotName.charAt(0)}</span>
+        <img src="agent-avatar.png" alt="${CONFIG.chatBotName}" class="avatar-img" />
       </div>
       <div class="message-content">
         <div class="typing-dots">
