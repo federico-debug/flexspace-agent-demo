@@ -115,7 +115,7 @@ export class ChatWidget {
         </div>
         <h3 class="welcome-title">FlexSpace Logistics</h3>
         <p class="welcome-subtitle">To chat with us, click below</p>
-        <button class="welcome-start-btn">Chat</button>
+        <button class="welcome-start-btn">Connect with an Agent</button>
       </div>
     `;
 

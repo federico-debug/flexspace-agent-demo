@@ -51,6 +51,13 @@
 .floating-chat-button .bot-icon-small {
   flex-shrink: 0;
   transition: all 0.3s ease;
+  background: #ffffff;
+  border-radius: 50%;
+  padding: 3px;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
 }
 
 .floating-chat-button .close-icon {
