@@ -559,6 +559,52 @@
   transform: translateY(-1px);
 }
 
+/* Quick Reply Chips */
+.quick-replies-container {
+  display: none;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 20px 12px;
+  animation: quickRepliesFadeIn 0.3s ease-out;
+}
+
+@keyframes quickRepliesFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quick-reply-chip {
+  background: var(--color-white);
+  color: var(--color-dark);
+  border: 1.5px solid var(--color-dark);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.quick-reply-chip:hover {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(218, 78, 41, 0.25);
+}
+
+.quick-reply-chip:active {
+  transform: translateY(0);
+}
+
 /* Welcome Screen */
 .chat-welcome-screen {
   position: absolute;

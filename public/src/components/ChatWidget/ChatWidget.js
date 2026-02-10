@@ -26,7 +26,7 @@ export class ChatWidget {
     this.messageList = new MessageList();
     this.chatInput = new ChatInput(
       (msg) => this.handleSendMessage(msg),
-      () => this.hideStarters()
+      () => { this.hideStarters(); this.hideQuickReplies(); }
     );
     this.typingIndicator = new TypingIndicator();
     this.startersComponent = null;
@@ -36,6 +36,7 @@ export class ChatWidget {
     this.element = null;
     this.welcomeScreen = null;
     this.startersFixedContainer = null;
+    this.quickRepliesContainer = null;
     this.startersShown = false;
     this.isChatEnded = false;
     this.isProcessing = false;
@@ -90,6 +91,11 @@ export class ChatWidget {
     this.startersFixedContainer.className = 'chat-starters-fixed';
     this.startersFixedContainer.style.display = 'none';
 
+    // Quick replies container (for bot-driven options)
+    this.quickRepliesContainer = document.createElement('div');
+    this.quickRepliesContainer.className = 'quick-replies-container';
+    this.quickRepliesContainer.style.display = 'none';
+
     // Input container
     const inputContainer = this.chatInput.create();
 
@@ -121,6 +127,7 @@ export class ChatWidget {
     widget.appendChild(header);
     widget.appendChild(messagesContainer);
     widget.appendChild(this.startersFixedContainer);
+    widget.appendChild(this.quickRepliesContainer);
     widget.appendChild(inputContainer);
     widget.appendChild(this.welcomeScreen);
     this.historyPanel.mount(widget);
@@ -144,13 +151,22 @@ export class ChatWidget {
       }
 
       this.typingIndicator.hide();
+      this.hideQuickReplies();
 
-      // Stream the message word-by-word
-      await this.messageList.addBotMessageStreaming(message.content);
+      // Parse quick replies before streaming (so the tag never appears)
+      const { cleanText, options } = this.parseQuickReplies(message.content);
+
+      // Stream the clean message word-by-word
+      await this.messageList.addBotMessageStreaming(cleanText);
       this.setProcessing(false);
 
-      // Show starters after first bot message
-      if (this.startersComponent && !this.startersShown) {
+      // Show quick reply chips if options were found
+      if (options.length > 0) {
+        this.renderQuickReplies(options);
+      }
+
+      // Show starters after first bot message (only if no quick replies)
+      if (options.length === 0 && this.startersComponent && !this.startersShown) {
         this.renderStarters();
       }
     });
@@ -225,6 +241,7 @@ export class ChatWidget {
     if (!message || this.isProcessing || this.isChatEnded) return;
 
     this.hideStarters();
+    this.hideQuickReplies();
     this.messageList.addUserMessage(message);
     this.setProcessing(true);
 
@@ -256,6 +273,7 @@ export class ChatWidget {
    */
   handleChatEnded() {
     this.isChatEnded = true;
+    this.hideQuickReplies();
     this.chatInput.disable();
     this.conversationEndedBanner = this.messageList.showEndedBanner(
       () => this.handleStartNewConversation()
@@ -310,6 +328,61 @@ export class ChatWidget {
     }
   }
 
+  /**
+   * Parse [options: A | B | C] from bot message text
+   * @param {string} text - Raw message content
+   * @returns {{ cleanText: string, options: string[] }}
+   */
+  parseQuickReplies(text) {
+    const match = text.match(/\[options:\s*(.+?)\]/i);
+    if (!match) return { cleanText: text, options: [] };
+
+    const cleanText = text.replace(/\[options:\s*.+?\]/i, '').trim();
+    const options = match[1].split('|').map(opt => opt.trim()).filter(Boolean);
+    return { cleanText, options };
+  }
+
+  /**
+   * Render quick reply chips from bot-provided options
+   * @param {string[]} options
+   */
+  renderQuickReplies(options) {
+    if (!this.quickRepliesContainer || this.isChatEnded) return;
+
+    this.quickRepliesContainer.innerHTML = '';
+    options.forEach(option => {
+      const chip = document.createElement('button');
+      chip.className = 'quick-reply-chip';
+      chip.textContent = option;
+      chip.addEventListener('click', () => this.handleQuickReplyClick(option));
+      this.quickRepliesContainer.appendChild(chip);
+    });
+
+    this.quickRepliesContainer.style.display = 'flex';
+    this.messageList.scrollToBottom();
+  }
+
+  /**
+   * Hide quick reply chips
+   */
+  hideQuickReplies() {
+    if (this.quickRepliesContainer) {
+      this.quickRepliesContainer.style.display = 'none';
+      this.quickRepliesContainer.innerHTML = '';
+    }
+  }
+
+  /**
+   * Handle quick reply chip click
+   * @param {string} option - Selected option text
+   */
+  async handleQuickReplyClick(option) {
+    if (this.isProcessing || this.isChatEnded) return;
+    this.hideQuickReplies();
+    this.hideStarters();
+    await this.handleSendMessage(option);
+  }
+
   clearMessages() {
     // Remove the ended banner explicitly if it exists
     if (this.conversationEndedBanner && this.conversationEndedBanner.parentNode) {
@@ -320,9 +393,10 @@ export class ChatWidget {
     // Clear all messages from the list
     this.messageList.clear();
 
-    // Reset starters state
+    // Reset starters and quick replies state
     this.startersShown = false;
     this.hideStarters();
+    this.hideQuickReplies();
 
     // Reset chat state
     this.isChatEnded = false;
@@ -358,12 +432,13 @@ export class ChatWidget {
     this.isChatEnded = true;
     this.chatInput.disable();
 
-    // Display the historical messages (read-only)
+    // Display the historical messages (read-only, strip option tags)
     chat.messages.forEach(msg => {
       if (msg.role === 'user') {
         this.messageList.addUserMessage(msg.content);
       } else {
-        this.messageList.addBotMessage(msg.content);
+        const { cleanText } = this.parseQuickReplies(msg.content);
+        this.messageList.addBotMessage(cleanText);
       }
     });
 
