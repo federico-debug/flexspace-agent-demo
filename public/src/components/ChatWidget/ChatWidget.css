@@ -559,11 +559,9 @@
   transform: translateY(-1px);
 }
 
-/* Quick Reply Chips */
+/* Quick Reply Dropdown */
 .quick-replies-container {
   display: none;
-  flex-wrap: wrap;
-  gap: 8px;
   padding: 8px 20px 12px;
   animation: quickRepliesFadeIn 0.3s ease-out;
 }
@@ -579,30 +577,98 @@
   }
 }
 
-.quick-reply-chip {
+.quick-reply-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.quick-reply-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
   background: var(--color-white);
   color: var(--color-dark);
   border: 1.5px solid var(--color-dark);
-  font-size: 13px;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 500;
-  padding: 8px 16px;
-  border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
-  white-space: nowrap;
 }
 
-.quick-reply-chip:hover {
+.quick-reply-trigger svg {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.quick-reply-dropdown.open .quick-reply-trigger {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(218, 78, 41, 0.15);
+}
+
+.quick-reply-dropdown.open .quick-reply-trigger svg {
+  transform: rotate(180deg);
+}
+
+.quick-reply-trigger:hover {
+  border-color: var(--color-primary);
+}
+
+.quick-reply-menu {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 10;
+}
+
+.quick-reply-dropdown.open .quick-reply-menu {
+  display: block;
+  animation: menuSlideIn 0.2s ease-out;
+}
+
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quick-reply-option {
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  color: var(--color-gray-800);
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.quick-reply-option:last-child {
+  border-bottom: none;
+}
+
+.quick-reply-option:hover {
   background: var(--color-primary);
   color: var(--color-white);
-  border-color: var(--color-primary);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(218, 78, 41, 0.25);
-}
-
-.quick-reply-chip:active {
-  transform: translateY(0);
 }
 
 /* Welcome Screen */

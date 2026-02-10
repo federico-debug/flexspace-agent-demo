@@ -343,27 +343,50 @@ export class ChatWidget {
   }
 
   /**
-   * Render quick reply chips from bot-provided options
+   * Render quick reply dropdown from bot-provided options
    * @param {string[]} options
    */
   renderQuickReplies(options) {
     if (!this.quickRepliesContainer || this.isChatEnded) return;
 
     this.quickRepliesContainer.innerHTML = '';
-    options.forEach(option => {
-      const chip = document.createElement('button');
-      chip.className = 'quick-reply-chip';
-      chip.textContent = option;
-      chip.addEventListener('click', () => this.handleQuickReplyClick(option));
-      this.quickRepliesContainer.appendChild(chip);
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'quick-reply-dropdown';
+
+    const trigger = document.createElement('button');
+    trigger.className = 'quick-reply-trigger';
+    trigger.innerHTML = `
+      <span>Select an option</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    `;
+    trigger.addEventListener('click', () => {
+      dropdown.classList.toggle('open');
     });
 
-    this.quickRepliesContainer.style.display = 'flex';
+    const menu = document.createElement('div');
+    menu.className = 'quick-reply-menu';
+
+    options.forEach(option => {
+      const item = document.createElement('button');
+      item.className = 'quick-reply-option';
+      item.textContent = option;
+      item.addEventListener('click', () => this.handleQuickReplyClick(option));
+      menu.appendChild(item);
+    });
+
+    dropdown.appendChild(trigger);
+    dropdown.appendChild(menu);
+    this.quickRepliesContainer.appendChild(dropdown);
+
+    this.quickRepliesContainer.style.display = 'block';
     this.messageList.scrollToBottom();
   }
 
   /**
-   * Hide quick reply chips
+   * Hide quick reply dropdown
    */
   hideQuickReplies() {
     if (this.quickRepliesContainer) {
@@ -373,7 +396,7 @@ export class ChatWidget {
   }
 
   /**
-   * Handle quick reply chip click
+   * Handle quick reply option click
    * @param {string} option - Selected option text
    */
   async handleQuickReplyClick(option) {
