@@ -57,7 +57,7 @@ export class ChatWidget {
     header.className = 'chat-header';
     header.innerHTML = `
       <div class="chat-header-left">
-        <button class="chat-history-btn" title="Chat History">
+        <button class="chat-history-btn has-tooltip" data-tooltip="Chat History">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
@@ -70,6 +70,10 @@ export class ChatWidget {
         <span class="status-text">Online</span>
       </div>
     `;
+
+    // Save status elements for online/offline toggling
+    this.statusDot = header.querySelector('.status-dot');
+    this.statusText = header.querySelector('.status-text');
 
     // History button event
     const historyBtn = header.querySelector('.chat-history-btn');
@@ -98,6 +102,21 @@ export class ChatWidget {
 
     // Input container
     const inputContainer = this.chatInput.create();
+    this.inputContainer = inputContainer;
+
+    // Restart icon button (inserted into input container)
+    this.restartIcon = document.createElement('button');
+    this.restartIcon.className = 'chat-restart-icon has-tooltip tooltip-top';
+    this.restartIcon.setAttribute('data-tooltip', 'New conversation');
+    this.restartIcon.style.display = 'none';
+    this.restartIcon.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 4v6h6"></path>
+        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+      </svg>
+    `;
+    this.restartIcon.addEventListener('click', () => this.handleStartNewConversation());
+    inputContainer.insertBefore(this.restartIcon, inputContainer.firstChild);
 
     // History panel
     this.historyPanel = new ChatHistory(
@@ -212,6 +231,8 @@ export class ChatWidget {
    */
   async dismissWelcomeScreen() {
     this.hideWelcomeScreen();
+    this.restartIcon.style.display = 'flex';
+    this.setOnlineStatus(true);
     await this.sendInitialGreeting();
   }
 
@@ -275,6 +296,7 @@ export class ChatWidget {
     this.isChatEnded = true;
     this.hideQuickReplies();
     this.chatInput.disable();
+    this.setOnlineStatus(false);
     this.conversationEndedBanner = this.messageList.showEndedBanner(
       () => this.handleStartNewConversation()
     );
@@ -293,6 +315,8 @@ export class ChatWidget {
     this.chatInput.enable();
     this.chatService.reset();
     this.chatService.shouldResetChat = true;
+    this.restartIcon.style.display = 'none';
+    this.setOnlineStatus(true);
     this.showWelcomeScreen();
   }
 
@@ -406,6 +430,19 @@ export class ChatWidget {
     await this.handleSendMessage(option);
   }
 
+  /**
+   * Toggle online/offline status in the header
+   * @param {boolean} online
+   */
+  setOnlineStatus(online) {
+    if (this.statusDot) {
+      this.statusDot.classList.toggle('offline', !online);
+    }
+    if (this.statusText) {
+      this.statusText.textContent = online ? 'Online' : 'Offline';
+    }
+  }
+
   clearMessages() {
     // Remove the ended banner explicitly if it exists
     if (this.conversationEndedBanner && this.conversationEndedBanner.parentNode) {
@@ -466,6 +503,7 @@ export class ChatWidget {
     });
 
     // Show ended banner since this is a past conversation
+    this.setOnlineStatus(false);
     this.conversationEndedBanner = this.messageList.showEndedBanner(
       () => this.handleStartNewConversation()
     );
