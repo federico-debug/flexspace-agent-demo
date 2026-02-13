@@ -1,0 +1,78 @@
+/**
+ * Embed-safe global styles
+ * Only includes widget-specific rules — no resets, no body styles,
+ * no element-level selectors that could conflict with the host page.
+ */
+
+/* Utility Classes */
+.hidden {
+  display: none;
+}
+
+/* Widget Containers */
+.widget-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xl);
+  min-height: 600px;
+}
+
+.chat-widget-container {
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Floating Chat Widget */
+.chat-widget-container.floating {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  width: 400px;
+  height: auto;
+  max-height: 600px;
+  z-index: 999;
+  animation: slideInUp 0.3s ease-out;
+  display: flex !important;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.chat-widget-container.floating .chat-widget {
+  width: 100%;
+  max-width: 100%;
+  height: 600px;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  /* Floating chat mobile */
+  .chat-widget-container.floating {
+    bottom: 80px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+
+  .chat-widget-container.floating .chat-widget {
+    height: 500px;
+  }
+}
