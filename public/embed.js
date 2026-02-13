@@ -11,14 +11,18 @@
   'use strict';
 
   // Base URL — auto-detect from the script's own src attribute
-  var scripts = document.getElementsByTagName('script');
-  var currentScript = scripts[scripts.length - 1];
-  var src = currentScript.getAttribute('src') || '';
-  var BASE_URL = src.replace(/\/embed\.js(\?.*)?$/, '') || '.';
+  var currentScript = document.currentScript;
+  var src = currentScript ? currentScript.getAttribute('src') : '';
+  var BASE_URL = src.replace(/\/embed\.js(\?.*)?$/, '');
+
+  if (!BASE_URL) {
+    console.error('[FlexSpace Chat] Could not determine base URL from embed.js src');
+    return;
+  }
+
+  console.log('[FlexSpace Chat] Loading from:', BASE_URL);
 
   // CSS files to inject (order matters: variables first)
-  // Uses embed-global.css instead of global.css to avoid
-  // overriding host page styles (resets, body, h1, h2, button, etc.)
   var cssFiles = [
     '/src/styles/variables.css',
     '/src/styles/animations.css',
@@ -34,12 +38,17 @@
     var link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = BASE_URL + file;
+    link.crossOrigin = 'anonymous';
     document.head.appendChild(link);
   });
 
-  // Load the app module
+  // Load the app module (type=module requires CORS for cross-origin)
   var script = document.createElement('script');
   script.type = 'module';
+  script.crossOrigin = 'anonymous';
   script.src = BASE_URL + '/src/app.js';
+  script.onerror = function () {
+    console.error('[FlexSpace Chat] Failed to load app.js from:', BASE_URL + '/src/app.js');
+  };
   document.body.appendChild(script);
 })();
