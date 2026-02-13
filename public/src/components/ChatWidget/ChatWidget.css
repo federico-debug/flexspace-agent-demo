@@ -680,10 +680,10 @@
 /* Welcome Screen */
 .chat-welcome-screen {
   position: absolute;
-  top: -1px;
-  left: -1px;
-  right: -1px;
-  bottom: -1px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: #ffffff;
   display: flex;
   align-items: center;
@@ -693,6 +693,24 @@
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
   border-radius: 24px;
+}
+
+/* In floating mode, remove welcome screen border-radius.
+   The parent .chat-widget-container.floating already has
+   border-radius + overflow:hidden, so it clips correctly.
+   This eliminates the subpixel gap where the orange header peeks through. */
+.floating .chat-welcome-screen {
+  border-radius: 0;
+}
+
+/* When the welcome screen is visible in floating mode, hide ALL underlying
+   content (header, messages, input, etc.) so nothing can bleed through the
+   anti-aliased corner pixels of the outer container's border-radius.
+   The welcome screen covers everything with a solid white background,
+   so the underlying elements are invisible anyway.
+   Using visibility:hidden keeps layout stable while preventing paint. */
+.floating .chat-widget:has(.chat-welcome-screen.visible) > :not(.chat-welcome-screen) {
+  visibility: hidden;
 }
 
 .chat-welcome-screen.visible {
