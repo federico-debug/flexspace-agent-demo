@@ -32,6 +32,15 @@ export class ChatOrchestrator {
     this.state = stateStore;
     this.events = eventBus;
     this.extractor = extractor;
+    this.selectedLang = CONFIG.defaultLang || 'en';
+  }
+
+  /**
+   * Set language for next chat session
+   * @param {string} lang - Language code ('en' | 'fr')
+   */
+  setLanguage(lang) {
+    this.selectedLang = lang;
   }
 
   // ============================================
@@ -63,7 +72,7 @@ export class ChatOrchestrator {
    */
   async createChat(resetChat = false) {
     try {
-      const data = await this.apiClient.createChat(resetChat);
+      const data = await this.apiClient.createChat(resetChat, this.selectedLang);
 
       this.state.initChat(data.chat_id);
       this.events.emit('chatCreated', { chatId: data.chat_id });

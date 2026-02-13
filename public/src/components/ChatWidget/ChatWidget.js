@@ -41,7 +41,8 @@ export class ChatWidget {
     this.isChatEnded = false;
     this.isProcessing = false;
     this.conversationEndedBanner = null;
-    this.isViewingHistory = false; // Flag to ignore incoming messages when viewing history
+    this.isViewingHistory = false;
+    this.selectedLang = CONFIG.defaultLang || 'en';
   }
 
   /**
@@ -127,16 +128,33 @@ export class ChatWidget {
     // Welcome screen overlay
     this.welcomeScreen = document.createElement('div');
     this.welcomeScreen.className = 'chat-welcome-screen visible';
+    const t = this.getTranslations();
     this.welcomeScreen.innerHTML = `
       <div class="welcome-content">
         <div class="welcome-avatar">
           <img src="agent-avatar.png" alt="${CONFIG.chatBotName}" />
         </div>
-        <h3 class="welcome-title">FlexSpace Logistics</h3>
-        <p class="welcome-subtitle">To chat with us, click below</p>
-        <button class="welcome-start-btn">Connect with an Agent</button>
+        <h3 class="welcome-title">${t.welcomeTitle}</h3>
+        <p class="welcome-subtitle">${t.welcomeSubtitle}</p>
+        <!-- Language selector hidden until French agent is ready
+        <div class="welcome-lang-selector">
+          <button class="lang-btn selected" data-lang="en">
+            <span class="lang-flag">🇬🇧</span>
+            <span class="lang-label">English</span>
+          </button>
+          <button class="lang-btn" data-lang="fr">
+            <span class="lang-flag">🇫🇷</span>
+            <span class="lang-label">Français</span>
+          </button>
+        </div>
+        -->
+        <button class="welcome-start-btn">${t.welcomeButton}</button>
       </div>
     `;
+
+    this.welcomeScreen.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => this.handleLanguageChange(btn.dataset.lang));
+    });
 
     this.welcomeScreen.querySelector('.welcome-start-btn').addEventListener('click', () => {
       this.dismissWelcomeScreen();
@@ -227,13 +245,72 @@ export class ChatWidget {
   }
 
   /**
-   * Dismiss welcome screen and start chat
+   * Dismiss welcome screen and start chat with selected language
    */
   async dismissWelcomeScreen() {
+    this.chatService.setLanguage(this.selectedLang);
+    this.updateHeaderForLanguage();
+    this.updateStartersForLanguage();
     this.hideWelcomeScreen();
     this.restartIcon.style.display = 'flex';
     this.setOnlineStatus(true);
     await this.sendInitialGreeting();
+  }
+
+  /**
+   * Get translations for current language
+   * @returns {Object} Translation strings
+   */
+  getTranslations() {
+    return CONFIG.i18n?.[this.selectedLang] || CONFIG.i18n?.en || {};
+  }
+
+  /**
+   * Handle language selection from welcome screen
+   * @param {string} lang - Language code ('en' | 'fr')
+   */
+  handleLanguageChange(lang) {
+    this.selectedLang = lang;
+    this.updateLangButtonSelection();
+    this.updateWelcomeScreenTexts();
+  }
+
+  /** Highlight the selected language button */
+  updateLangButtonSelection() {
+    this.welcomeScreen.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.lang === this.selectedLang);
+    });
+  }
+
+  /** Update welcome screen texts to match selected language */
+  updateWelcomeScreenTexts() {
+    const t = this.getTranslations();
+    const title = this.welcomeScreen.querySelector('.welcome-title');
+    const subtitle = this.welcomeScreen.querySelector('.welcome-subtitle');
+    const button = this.welcomeScreen.querySelector('.welcome-start-btn');
+
+    if (title) title.textContent = t.welcomeTitle;
+    if (subtitle) subtitle.textContent = t.welcomeSubtitle;
+    if (button) button.textContent = t.welcomeButton;
+  }
+
+  /** Update header title to match selected language */
+  updateHeaderForLanguage() {
+    const t = this.getTranslations();
+    const headerTitle = this.element?.querySelector('.chat-header-left h3');
+    if (headerTitle) headerTitle.textContent = t.chatTitle;
+  }
+
+  /** Rebuild starters for selected language */
+  updateStartersForLanguage() {
+    const t = this.getTranslations();
+    if (t.chatStarters?.length > 0) {
+      this.startersComponent = new ExampleQuestions(
+        t.chatStarters,
+        (q) => this.handleStarterClick(q)
+      );
+      this.startersShown = false;
+    }
   }
 
   /**
@@ -247,7 +324,8 @@ export class ChatWidget {
       const shouldReset = this.chatService.shouldResetChat || false;
       await this.chatService.createChat(shouldReset);
       this.chatService.shouldResetChat = false;
-      await this.chatService.sendMessage('Hello', true);
+      const greeting = this.getTranslations().initialGreeting || 'Hello';
+      await this.chatService.sendMessage(greeting, true);
     } catch (error) {
       console.error('Error sending initial greeting:', error);
       this.setProcessing(false);
@@ -293,12 +371,14 @@ export class ChatWidget {
    * Handle chat ended
    */
   handleChatEnded() {
+    const t = this.getTranslations();
     this.isChatEnded = true;
     this.hideQuickReplies();
-    this.chatInput.disable();
+    this.chatInput.disable(t.inputEndedPlaceholder);
     this.setOnlineStatus(false);
     this.conversationEndedBanner = this.messageList.showEndedBanner(
-      () => this.handleStartNewConversation()
+      () => this.handleStartNewConversation(),
+      t
     );
   }
 
@@ -378,10 +458,11 @@ export class ChatWidget {
     const dropdown = document.createElement('div');
     dropdown.className = 'quick-reply-dropdown';
 
+    const t = this.getTranslations();
     const trigger = document.createElement('button');
     trigger.className = 'quick-reply-trigger';
     trigger.innerHTML = `
-      <span>Select an option</span>
+      <span>${t.selectOption || 'Select an option'}</span>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
@@ -435,11 +516,12 @@ export class ChatWidget {
    * @param {boolean} online
    */
   setOnlineStatus(online) {
+    const t = this.getTranslations();
     if (this.statusDot) {
       this.statusDot.classList.toggle('offline', !online);
     }
     if (this.statusText) {
-      this.statusText.textContent = online ? 'Online' : 'Offline';
+      this.statusText.textContent = online ? t.online : t.offline;
     }
   }
 
@@ -489,8 +571,9 @@ export class ChatWidget {
     this.clearMessages();
 
     // Re-set isChatEnded since clearMessages resets it
+    const t = this.getTranslations();
     this.isChatEnded = true;
-    this.chatInput.disable();
+    this.chatInput.disable(t.inputEndedPlaceholder);
 
     // Display the historical messages (read-only, strip option tags)
     chat.messages.forEach(msg => {
@@ -505,7 +588,8 @@ export class ChatWidget {
     // Show ended banner since this is a past conversation
     this.setOnlineStatus(false);
     this.conversationEndedBanner = this.messageList.showEndedBanner(
-      () => this.handleStartNewConversation()
+      () => this.handleStartNewConversation(),
+      t
     );
   }
 

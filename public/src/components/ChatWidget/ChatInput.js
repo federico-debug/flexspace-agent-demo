@@ -141,12 +141,12 @@ export class ChatInput {
   /**
    * Disable input (for ended conversation)
    */
-  disable() {
+  disable(placeholderText = 'Conversation ended') {
     if (this.inputField && this.sendButton) {
       this.inputField.disabled = true;
       this.inputField.style.cursor = 'not-allowed';
       this.inputField.style.opacity = '0.6';
-      this.inputField.placeholder = 'Conversation ended';
+      this.inputField.placeholder = placeholderText;
       this.sendButton.disabled = true;
     }
   }

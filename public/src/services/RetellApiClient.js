@@ -6,13 +6,14 @@ export class RetellApiClient {
   /**
    * Create a new chat session
    * @param {boolean} [resetChat=false] - Force reset server-side cache
+   * @param {string} [lang='en'] - Language code for agent selection
    * @returns {Promise<{chat_id: string}>}
    */
-  async createChat(resetChat = false) {
+  async createChat(resetChat = false, lang = 'en') {
     const response = await fetch('/api/create-chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reset_chat: resetChat })
+      body: JSON.stringify({ reset_chat: resetChat, lang })
     });
 
     if (!response.ok) {

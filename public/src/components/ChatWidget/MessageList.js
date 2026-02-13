@@ -199,8 +199,12 @@ export class MessageList {
    * @param {Function} onStartNew - Callback for "Start New" button
    * @returns {HTMLElement} The banner element
    */
-  showEndedBanner(onStartNew) {
+  showEndedBanner(onStartNew, labels = {}) {
     if (!this.container) return null;
+
+    const title = labels.conversationEnded || 'Conversation Ended';
+    const subtitle = labels.conversationCompletedSubtitle || 'This conversation has been completed';
+    const btnText = labels.startNewConversation || 'Start New Conversation';
 
     const banner = document.createElement('div');
     banner.className = 'conversation-ended-banner';
@@ -213,15 +217,15 @@ export class MessageList {
           </svg>
         </div>
         <div class="conversation-ended-text">
-          <div class="conversation-ended-title">Conversation Ended</div>
-          <div class="conversation-ended-subtitle">This conversation has been completed</div>
+          <div class="conversation-ended-title">${title}</div>
+          <div class="conversation-ended-subtitle">${subtitle}</div>
         </div>
         <button class="start-new-conversation-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"></polyline>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
           </svg>
-          Start New Conversation
+          ${btnText}
         </button>
       </div>
     `;

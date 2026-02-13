@@ -8,6 +8,13 @@
 
 const RETELL_API_KEY = process.env.RETELL_API_KEY;
 const RETELL_AGENT_ID = process.env.RETELL_AGENT_ID;
+const RETELL_AGENT_ID_FR = process.env.RETELL_AGENT_ID_FR;
+
+/** Resolve agent ID from language code (whitelist approach for security) */
+const AGENT_MAP = {
+  en: RETELL_AGENT_ID,
+  fr: RETELL_AGENT_ID_FR,
+};
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -29,11 +36,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Use agent_id from environment (secure)
-    const agent_id = RETELL_AGENT_ID;
+    // Resolve agent_id from language parameter (defaults to English)
+    const lang = req.body?.lang || 'en';
+    const agent_id = AGENT_MAP[lang] || RETELL_AGENT_ID;
 
     if (!agent_id) {
-      return res.status(500).json({ error: 'Missing RETELL_AGENT_ID env variable' });
+      return res.status(500).json({ error: `Missing agent ID for language: ${lang}` });
     }
 
     if (!RETELL_API_KEY) {

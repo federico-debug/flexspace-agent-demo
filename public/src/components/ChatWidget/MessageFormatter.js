@@ -18,7 +18,7 @@ class OutlookFormatter {
    * @returns {boolean}
    */
   canHandle(text) {
-    return text.includes('outlook.office.com/bookwithme');
+    return text.includes('outlook.office.com/book');
   }
 
   /**
@@ -26,7 +26,7 @@ class OutlookFormatter {
    * @returns {string} HTML string
    */
   format(text) {
-    const outlookPattern = /(https?:\/\/outlook\.office\.com\/bookwithme\/[^\s<]+)/gi;
+    const outlookPattern = /(https?:\/\/outlook\.office\.com\/book(?:withme)?\/[^\s<]+)/gi;
     const parts = [];
     let lastIndex = 0;
     let match;
@@ -94,7 +94,7 @@ class LinkFormatter {
       const urlPattern = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
       return part.replace(urlPattern, (url) => {
         // Skip Outlook URLs (already processed)
-        if (url.includes('outlook.office.com/bookwithme')) {
+        if (url.includes('outlook.office.com/book')) {
           return url;
         }
 
