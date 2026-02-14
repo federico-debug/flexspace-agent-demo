@@ -59,7 +59,7 @@ export class MessageList {
     msgElement.className = 'chat-message bot-message';
     msgElement.innerHTML = `
       <div class="message-avatar">
-        <img src="agent-avatar.png" alt="${CONFIG.chatBotName}" class="avatar-img" />
+        <img src="${CONFIG.baseUrl}/agent-avatar.png" alt="${CONFIG.chatBotName}" class="avatar-img" />
       </div>
       <div class="message-content">
         <div class="message-sender">${CONFIG.chatBotName}</div>
@@ -83,7 +83,7 @@ export class MessageList {
     msgElement.className = 'chat-message bot-message';
     msgElement.innerHTML = `
       <div class="message-avatar">
-        <img src="agent-avatar.png" alt="${CONFIG.chatBotName}" class="avatar-img" />
+        <img src="${CONFIG.baseUrl}/agent-avatar.png" alt="${CONFIG.chatBotName}" class="avatar-img" />
       </div>
       <div class="message-content">
         <div class="message-sender">${CONFIG.chatBotName}</div>

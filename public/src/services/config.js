@@ -2,7 +2,30 @@
  * Configuration Service
  * Chat Agent Configuration
  */
+
+// Auto-detect base URL for assets and API calls.
+// When loaded via embed.js cross-origin, paths must be absolute to the Vercel host.
+// When loaded directly (index.html), paths can be relative (empty base).
+function detectBaseUrl() {
+  // Check if app.js was loaded from a different origin (embed scenario)
+  try {
+    const appScript = document.querySelector('script[src*="/src/app.js"]');
+    if (appScript && appScript.src) {
+      const url = new URL(appScript.src);
+      const origin = url.origin;
+      // If the script origin differs from the page origin, we're embedded
+      if (origin !== window.location.origin) {
+        return origin;
+      }
+    }
+  } catch (e) { /* ignore */ }
+  return ''; // Same-origin, use relative paths
+}
+
+const BASE_URL = detectBaseUrl();
+
 export const CONFIG = {
+  baseUrl: BASE_URL,
   // Chat Agent Configuration
   // NOTE: chatAgentId moved to backend .env.local for security
   chatApiUrl: 'https://api.retellai.com/v2',

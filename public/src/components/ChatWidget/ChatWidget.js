@@ -132,7 +132,7 @@ export class ChatWidget {
     this.welcomeScreen.innerHTML = `
       <div class="welcome-content">
         <div class="welcome-avatar">
-          <img src="agent-avatar.png" alt="${CONFIG.chatBotName}" />
+          <img src="${CONFIG.baseUrl}/agent-avatar.png" alt="${CONFIG.chatBotName}" />
         </div>
         <h3 class="welcome-title">${t.welcomeTitle}</h3>
         <p class="welcome-subtitle">${t.welcomeSubtitle}</p>

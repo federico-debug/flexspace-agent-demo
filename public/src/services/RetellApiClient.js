@@ -2,6 +2,8 @@
  * RetellApiClient - HTTP client for Retell AI API
  * Single Responsibility: Only handles HTTP communication with backend
  */
+import { CONFIG } from './config.js';
+
 export class RetellApiClient {
   /**
    * Create a new chat session
@@ -10,7 +12,7 @@ export class RetellApiClient {
    * @returns {Promise<{chat_id: string}>}
    */
   async createChat(resetChat = false, lang = 'en') {
-    const response = await fetch('/api/create-chat', {
+    const response = await fetch(`${CONFIG.baseUrl}/api/create-chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reset_chat: resetChat, lang })
@@ -31,7 +33,7 @@ export class RetellApiClient {
    * @returns {Promise<Object>} API response with messages array
    */
   async sendMessage(chatId, message) {
-    const response = await fetch('/api/send-message', {
+    const response = await fetch(`${CONFIG.baseUrl}/api/send-message`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, message })
@@ -51,7 +53,7 @@ export class RetellApiClient {
    * @returns {Promise<Object>} Chat details
    */
   async getChatDetails(chatId) {
-    const response = await fetch(`/api/get-chat?chat_id=${chatId}`, {
+    const response = await fetch(`${CONFIG.baseUrl}/api/get-chat?chat_id=${chatId}`, {
       method: 'GET'
     });
 
@@ -72,7 +74,7 @@ export class RetellApiClient {
    * @returns {Promise<Object>}
    */
   async endChat(chatId) {
-    const response = await fetch('/api/end-chat', {
+    const response = await fetch(`${CONFIG.baseUrl}/api/end-chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId })

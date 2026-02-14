@@ -2,6 +2,8 @@
  * FloatingChatButton Component
  * Floating button to toggle chat widget
  */
+import { CONFIG } from '../../services/config.js';
+
 export class FloatingChatButton {
   /**
    * @param {Function} onClick - Callback when button is clicked
@@ -24,7 +26,7 @@ export class FloatingChatButton {
     // Button content with text and icons
     button.innerHTML = `
       <div class="button-content">
-        <img class="bot-icon-small" src="image6.png" alt="FlexSpace" width="24" height="24" />
+        <img class="bot-icon-small" src="${CONFIG.baseUrl}/image6.png" alt="FlexSpace" width="24" height="24" />
         <span class="button-text">Get instant answers from a live agent</span>
       </div>
       <svg class="close-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
