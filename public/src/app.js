@@ -111,7 +111,15 @@ class ChatApp {
 }
 
 // Initialize chat app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+// Support both normal page load and dynamic injection (embed.js)
+// When loaded via embed.js, DOMContentLoaded may have already fired
+function initApp() {
   const chatApp = new ChatApp();
   chatApp.init();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
