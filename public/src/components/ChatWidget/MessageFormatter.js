@@ -106,6 +106,58 @@ class LinkFormatter {
 }
 
 /**
+ * RetellLinkFormatter - Converts [link: URL | Text] tags into clickable buttons
+ */
+class RetellLinkFormatter {
+  /**
+   * @param {string} text
+   * @returns {boolean}
+   */
+  canHandle(text) {
+    return /\[link:\s*https?:\/\//i.test(text);
+  }
+
+  /**
+   * @param {string} text
+   * @returns {string} HTML string with link buttons
+   */
+  format(text) {
+    const pattern = /\[link:\s*(https?:\/\/[^\s|]+)\s*\|\s*([^\]]+)\]/gi;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = pattern.exec(text)) !== null) {
+      // Escape text before the link tag
+      if (match.index > lastIndex) {
+        parts.push(this.escapeHtml(text.substring(lastIndex, match.index)));
+      }
+
+      const url = match[1].trim();
+      const label = match[2].trim();
+      parts.push(
+        `<a href="${url}" target="_blank" rel="noopener noreferrer" class="retell-link-btn">${this.escapeHtml(label)}</a>`
+      );
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Escape remaining text after last link
+    if (lastIndex < text.length) {
+      parts.push(this.escapeHtml(text.substring(lastIndex)));
+    }
+
+    return parts.join('');
+  }
+
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+}
+
+/**
  * PlainTextFormatter - Escapes HTML for security (fallback)
  */
 class PlainTextFormatter {
@@ -143,6 +195,7 @@ export class MessageFormatter {
     ];
 
     this.plainTextFormatter = new PlainTextFormatter();
+    this.retellLinkFormatter = new RetellLinkFormatter();
   }
 
   /**
@@ -159,6 +212,9 @@ export class MessageFormatter {
     const outlookFormatter = this.formatters.find(f => f instanceof OutlookFormatter);
     if (outlookFormatter && outlookFormatter.canHandle(text)) {
       result = outlookFormatter.format(text);
+    } else if (this.retellLinkFormatter.canHandle(text)) {
+      // Parse [link: URL | Text] tags into clickable buttons
+      result = this.retellLinkFormatter.format(text);
     } else {
       // Escape HTML first for plain text
       result = this.plainTextFormatter.format(text);
@@ -196,4 +252,4 @@ export class MessageFormatter {
 }
 
 // Export individual formatters for testing/extension
-export { OutlookFormatter, LinkFormatter, PlainTextFormatter };
+export { OutlookFormatter, RetellLinkFormatter, LinkFormatter, PlainTextFormatter };

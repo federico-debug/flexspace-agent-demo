@@ -107,8 +107,7 @@ export class ChatWidget {
 
     // Restart icon button (inserted into input container)
     this.restartIcon = document.createElement('button');
-    this.restartIcon.className = 'chat-restart-icon has-tooltip tooltip-top';
-    this.restartIcon.setAttribute('data-tooltip', 'New conversation');
+    this.restartIcon.className = 'chat-restart-icon';
     this.restartIcon.style.display = 'none';
     this.restartIcon.innerHTML = `
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -136,7 +135,6 @@ export class ChatWidget {
         </div>
         <h3 class="welcome-title">${t.welcomeTitle}</h3>
         <p class="welcome-subtitle">${t.welcomeSubtitle}</p>
-        <!-- Language selector hidden until French agent is ready
         <div class="welcome-lang-selector">
           <button class="lang-btn selected" data-lang="en">
             <span class="lang-flag">🇬🇧</span>
@@ -147,7 +145,6 @@ export class ChatWidget {
             <span class="lang-label">Français</span>
           </button>
         </div>
-        -->
         <button class="welcome-start-btn">${t.welcomeButton}</button>
       </div>
     `;
