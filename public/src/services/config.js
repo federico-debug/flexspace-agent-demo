@@ -67,7 +67,7 @@ export const CONFIG = {
       ]
     },
     fr: {
-      welcomeTitle: 'FlexSpace Logistique',
+      welcomeTitle: 'FlexSpace Logistics',
       welcomeSubtitle: 'Pour discuter avec nous, cliquez ci-dessous',
       welcomeButton: 'Parler avec un agent',
       chatTitle: 'Discuter avec FlexSpace',
