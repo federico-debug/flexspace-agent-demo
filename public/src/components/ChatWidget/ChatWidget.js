@@ -9,6 +9,9 @@
  * - ExampleQuestions: Shows starter suggestions
  */
 import { CONFIG } from '../../services/config.js';
+import { RatingService } from '../../services/ratingService.js';
+import { TrackingService } from '../../services/trackingService.js';
+import { chatHistoryStore } from '../../services/ChatHistoryStore.js';
 import { MessageList } from './MessageList.js';
 import { ChatInput } from './ChatInput.js';
 import { TypingIndicator } from './TypingIndicator.js';
@@ -220,6 +223,10 @@ export class ChatWidget {
       if (this.isViewingHistory) return;
       this.handleChatEnded();
     });
+
+    this.chatService.on('chatCreated', ({ chatId }) => {
+      TrackingService.chatStarted({ chatId, lang: this.selectedLang });
+    });
   }
 
   /**
@@ -375,8 +382,28 @@ export class ChatWidget {
     this.setOnlineStatus(false);
     this.conversationEndedBanner = this.messageList.showEndedBanner(
       () => this.handleStartNewConversation(),
-      t
+      t,
+      ({ rating, comment }) => this.submitRating(rating, comment)
     );
+  }
+
+  /**
+   * Submit conversation rating to webhook and mark as rated in history
+   * @param {string} rating - 'positive' or 'negative'
+   * @param {string} comment - Optional comment
+   * @param {string} [chatId] - Override chatId (for history ratings)
+   */
+  submitRating(rating, comment, chatId = null) {
+    const id = chatId || this.chatService.chatId || '';
+    RatingService.submit({
+      rating,
+      comment,
+      lang: this.selectedLang,
+      chatId: id
+    });
+    if (id) {
+      chatHistoryStore.setRated(id, rating);
+    }
   }
 
   /**
@@ -582,11 +609,13 @@ export class ChatWidget {
       }
     });
 
-    // Show ended banner since this is a past conversation
+    // Show ended banner — include rating only if not already rated
     this.setOnlineStatus(false);
+    const alreadyRated = chatHistoryStore.isRated(chat.id);
     this.conversationEndedBanner = this.messageList.showEndedBanner(
       () => this.handleStartNewConversation(),
-      t
+      t,
+      alreadyRated ? null : ({ rating, comment }) => this.submitRating(rating, comment, chat.id)
     );
   }
 

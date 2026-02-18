@@ -117,6 +117,29 @@ export class ChatHistoryStore {
   }
 
   /**
+   * Mark a chat as rated so the rating UI won't show again
+   * @param {string} chatId
+   * @param {string} rating - 'positive' or 'negative'
+   */
+  setRated(chatId, rating) {
+    const chat = this.history.find(c => c.id === chatId);
+    if (chat) {
+      chat.rated = rating;
+      this.save();
+    }
+  }
+
+  /**
+   * Check if a chat has already been rated
+   * @param {string} chatId
+   * @returns {boolean}
+   */
+  isRated(chatId) {
+    const chat = this.history.find(c => c.id === chatId);
+    return !!chat?.rated;
+  }
+
+  /**
    * Delete a chat by ID
    * @param {string} chatId
    */

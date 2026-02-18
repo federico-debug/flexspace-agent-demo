@@ -64,7 +64,11 @@ export const CONFIG = {
         'What services do you offer?',
         'How much per pallet?',
         'Where are your warehouses?'
-      ]
+      ],
+      rateTitle: 'How was your experience?',
+      rateThankYou: 'Thanks for your feedback!',
+      rateCommentPlaceholder: 'Any additional comments? (optional)',
+      rateSend: 'Send'
     },
     fr: {
       welcomeTitle: 'FlexSpace Logistics',
@@ -85,7 +89,18 @@ export const CONFIG = {
         'Quels services proposez-vous ?',
         'Combien par palette ?',
         'Où sont vos entrepôts ?'
-      ]
+      ],
+      rateTitle: 'Comment était votre expérience ?',
+      rateThankYou: 'Merci pour votre retour !',
+      rateCommentPlaceholder: 'Des commentaires supplémentaires ? (optionnel)',
+      rateSend: 'Envoyer'
     }
-  }
+  },
+  // Rating webhook URLs per language
+  ratingWebhooks: {
+    en: 'https://flexspacelogistics.app.n8n.cloud/webhook/laurenchatbotrating',
+    fr: 'https://flexspacelogistics.app.n8n.cloud/webhook/genevievechatbotrating'
+  },
+  // Chat started tracking webhook (single endpoint, lang included in payload)
+  chatStartedWebhook: 'https://flexspacelogistics.app.n8n.cloud/webhook/flexspacechatbotstarted'
 };

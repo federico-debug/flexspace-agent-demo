@@ -195,16 +195,22 @@ export class MessageList {
   }
 
   /**
-   * Show conversation ended banner
+   * Show conversation ended banner with rating UI
    * @param {Function} onStartNew - Callback for "Start New" button
+   * @param {Object} labels - i18n translation strings
+   * @param {Function} [onRate] - Callback when user submits rating: ({ rating, comment }) => void
    * @returns {HTMLElement} The banner element
    */
-  showEndedBanner(onStartNew, labels = {}) {
+  showEndedBanner(onStartNew, labels = {}, onRate = null) {
     if (!this.container) return null;
 
     const title = labels.conversationEnded || 'Conversation Ended';
     const subtitle = labels.conversationCompletedSubtitle || 'This conversation has been completed';
     const btnText = labels.startNewConversation || 'Start New Conversation';
+    const rateTitle = labels.rateTitle || 'How was your experience?';
+    const rateThankYou = labels.rateThankYou || 'Thanks for your feedback!';
+    const rateCommentPlaceholder = labels.rateCommentPlaceholder || 'Any additional comments? (optional)';
+    const rateSend = labels.rateSend || 'Send';
 
     const banner = document.createElement('div');
     banner.className = 'conversation-ended-banner';
@@ -220,6 +226,30 @@ export class MessageList {
           <div class="conversation-ended-title">${title}</div>
           <div class="conversation-ended-subtitle">${subtitle}</div>
         </div>
+        ${onRate ? `
+        <div class="conversation-rating">
+          <div class="rating-prompt">${rateTitle}</div>
+          <div class="rating-buttons">
+            <button class="rating-btn" data-rating="positive" aria-label="Thumbs up">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"></path>
+                <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+              </svg>
+            </button>
+            <button class="rating-btn" data-rating="negative" aria-label="Thumbs down">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"></path>
+                <path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="rating-comment-section" style="display: none;">
+            <textarea class="rating-comment" placeholder="${rateCommentPlaceholder}" rows="2"></textarea>
+            <button class="rating-submit-btn">${rateSend}</button>
+          </div>
+          <div class="rating-thank-you" style="display: none;">${rateThankYou}</div>
+        </div>
+        ` : ''}
         <button class="start-new-conversation-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"></polyline>
@@ -232,6 +262,49 @@ export class MessageList {
 
     const startNewBtn = banner.querySelector('.start-new-conversation-btn');
     startNewBtn.addEventListener('click', onStartNew);
+
+    // Wire up rating interaction
+    if (onRate) {
+      let selectedRating = null;
+      const ratingSection = banner.querySelector('.conversation-rating');
+      const commentSection = banner.querySelector('.rating-comment-section');
+      const thankYou = banner.querySelector('.rating-thank-you');
+      const ratingBtns = banner.querySelectorAll('.rating-btn');
+      const commentInput = banner.querySelector('.rating-comment');
+      const submitBtn = banner.querySelector('.rating-submit-btn');
+
+      ratingBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedRating = btn.dataset.rating;
+          ratingBtns.forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          commentSection.style.display = 'flex';
+          this.scrollToBottom();
+        });
+      });
+
+      const submitRating = () => {
+        if (!selectedRating) return;
+        const comment = commentInput?.value?.trim() || '';
+        onRate({ rating: selectedRating, comment });
+        // Show thank you, hide rating UI
+        commentSection.style.display = 'none';
+        banner.querySelector('.rating-prompt').style.display = 'none';
+        banner.querySelector('.rating-buttons').style.display = 'none';
+        thankYou.style.display = 'block';
+        this.scrollToBottom();
+      };
+
+      submitBtn.addEventListener('click', submitRating);
+
+      // Allow Enter in textarea to submit (Shift+Enter for newline)
+      commentInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          submitRating();
+        }
+      });
+    }
 
     this.container.appendChild(banner);
     this.scrollToBottom();

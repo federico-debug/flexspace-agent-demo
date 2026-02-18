@@ -385,6 +385,109 @@
   height: 16px;
 }
 
+/* Conversation Rating */
+.conversation-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.rating-prompt {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d2a67;
+}
+
+.rating-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.rating-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(29, 42, 103, 0.2);
+  background: #ffffff;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.rating-btn:hover {
+  border-color: #da4e29;
+  color: #da4e29;
+  transform: scale(1.1);
+}
+
+.rating-btn.selected {
+  background: #da4e29;
+  border-color: #da4e29;
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.rating-comment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  animation: messageSlideIn 0.2s ease-out;
+}
+
+.rating-comment {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid rgba(29, 42, 103, 0.2);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  resize: none;
+  outline: none;
+  color: #1d2a67;
+  background: #ffffff;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.rating-comment:focus {
+  border-color: #da4e29;
+}
+
+.rating-comment::placeholder {
+  color: #9ca3af;
+}
+
+.rating-submit-btn {
+  align-self: flex-end;
+  padding: 8px 20px;
+  background: #da4e29;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.rating-submit-btn:hover {
+  background: #b8401f;
+}
+
+.rating-thank-you {
+  font-size: 14px;
+  font-weight: 600;
+  color: #16a34a;
+  animation: messageSlideIn 0.3s ease-out;
+}
+
 /* Message Links */
 .message-text a.message-link {
   color: #2563eb;
@@ -1049,6 +1152,15 @@
   .start-new-conversation-btn {
     padding: 10px 20px;
     font-size: 14px;
+  }
+
+  .rating-btn {
+    width: 42px;
+    height: 42px;
+  }
+
+  .rating-comment {
+    font-size: 13px;
   }
 
   .chat-restart-icon {
