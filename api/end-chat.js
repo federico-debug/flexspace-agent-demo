@@ -1,12 +1,12 @@
 /**
  * Vercel Serverless Function
- * End chat session with Retell AI
+ * End chat session with Retell AI via SDK
  */
 
-const RETELL_API_KEY = process.env.RETELL_API_KEY;
+import client from './_retellClient.js';
 
 export default async function handler(req, res) {
-  // Enable CORS
+  // CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
@@ -26,27 +26,17 @@ export default async function handler(req, res) {
 
   try {
     const { chat_id } = req.body;
-    
+
     if (!chat_id) {
       return res.status(400).json({ error: 'chat_id is required' });
     }
 
-    const response = await fetch(`https://api.retellai.com/end-chat/${chat_id}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RETELL_API_KEY}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to end chat');
-    }
-
-    const data = await response.json();
-    return res.status(200).json(data);
+    // SDK returns void (204 No Content) on success
+    await client.chat.end(chat_id);
+    return res.status(200).json({ success: true });
   } catch (e) {
     console.error('❌ Error ending chat:', e);
-    return res.status(500).json({ error: e.message });
+    const status = e.status || 500;
+    return res.status(status).json({ error: e.message });
   }
 }

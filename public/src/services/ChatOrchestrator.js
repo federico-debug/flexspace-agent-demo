@@ -14,6 +14,7 @@ import { ChatStateStore } from './ChatStateStore.js';
 import { VariableExtractor } from './VariableExtractor.js';
 import { chatHistoryStore } from './ChatHistoryStore.js';
 import { CONFIG } from './config.js';
+import { getUtmParams } from '../utils/utm.js';
 
 export class ChatOrchestrator {
   /**
@@ -72,9 +73,14 @@ export class ChatOrchestrator {
    */
   async createChat(resetChat = false) {
     try {
-      const data = await this.apiClient.createChat(resetChat, this.selectedLang);
+      const utm = getUtmParams();
+      const data = await this.apiClient.createChat(resetChat, this.selectedLang, utm);
 
       this.state.initChat(data.chat_id);
+
+      // Fire-and-forget: store UTMs for Retell custom function retrieval
+      this.apiClient.captureUtm(data.chat_id, utm);
+
       this.events.emit('chatCreated', { chatId: data.chat_id });
       return data.chat_id;
 

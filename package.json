@@ -1,0 +1,9 @@
+{
+  "name": "flexspace-agent-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "retell-sdk": "^5.0.0"
+  }
+}

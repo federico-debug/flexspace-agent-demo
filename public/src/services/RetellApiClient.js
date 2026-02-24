@@ -11,11 +11,11 @@ export class RetellApiClient {
    * @param {string} [lang='en'] - Language code for agent selection
    * @returns {Promise<{chat_id: string}>}
    */
-  async createChat(resetChat = false, lang = 'en') {
+  async createChat(resetChat = false, lang = 'en', utm = {}) {
     const response = await fetch(`${CONFIG.baseUrl}/api/create-chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reset_chat: resetChat, lang })
+      body: JSON.stringify({ reset_chat: resetChat, lang, utm })
     });
 
     if (!response.ok) {
@@ -66,6 +66,24 @@ export class RetellApiClient {
     }
 
     return response.json();
+  }
+
+  /**
+   * Send UTM params to capture endpoint (for Retell custom function retrieval)
+   * Fire-and-forget — failures are logged but never block the chat flow
+   * @param {string} chatId - Chat session ID
+   * @param {Object} utm - UTM parameters
+   */
+  async captureUtm(chatId, utm) {
+    try {
+      await fetch(`${CONFIG.baseUrl}/api/capture-utm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, ...utm })
+      });
+    } catch (e) {
+      console.warn('UTM capture failed (non-blocking):', e.message);
+    }
   }
 
   /**

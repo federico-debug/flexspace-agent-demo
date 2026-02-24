@@ -1,12 +1,13 @@
 /**
  * Vercel Serverless Function
- * Creates a new chat session with Retell AI
+ * Creates a new chat session with Retell AI via SDK
  *
  * NOTE: Each request creates a NEW chat to avoid mixing conversations
  * between different users (no server-side caching of chat IDs)
  */
 
-const RETELL_API_KEY = process.env.RETELL_API_KEY;
+import client from './_retellClient.js';
+
 const RETELL_AGENT_ID = process.env.RETELL_AGENT_ID;
 const RETELL_AGENT_ID_FR = process.env.RETELL_AGENT_ID_FR;
 
@@ -45,39 +46,23 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: `Missing agent ID for language: ${lang}` });
     }
 
-    if (!RETELL_API_KEY) {
-      return res.status(500).json({ error: 'Missing RETELL_API_KEY env variable' });
-    }
-
     // Always create a NEW chat per request
     // This prevents mixing conversations between different users
-    const response = await fetch('https://api.retellai.com/create-chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${RETELL_API_KEY}`,
+    const chatResponse = await client.chat.create({
+      agent_id,
+      retell_llm_dynamic_variables: {
+        utm_source: utm.utm_source || 'direct',
+        utm_medium: utm.utm_medium || null,
+        utm_campaign: utm.utm_campaign || null,
+        utm_content: utm.utm_content || null,
+        utm_term: utm.utm_term || null,
       },
-      body: JSON.stringify({
-        agent_id,
-        retell_llm_dynamic_variables: {
-          utm_source: utm.utm_source || 'direct',
-          utm_medium: utm.utm_medium || null,
-          utm_campaign: utm.utm_campaign || null,
-          utm_content: utm.utm_content || null,
-          utm_term: utm.utm_term || null,
-        },
-      }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to create chat');
-    }
-
-    const data = await response.json();
-    return res.status(200).json(data);
+    return res.status(200).json(chatResponse);
   } catch (e) {
     console.error('❌ Error creating chat:', e);
-    return res.status(500).json({ error: e.message });
+    const status = e.status || 500;
+    return res.status(status).json({ error: e.message });
   }
 }
