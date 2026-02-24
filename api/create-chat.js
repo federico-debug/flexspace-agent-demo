@@ -38,6 +38,7 @@ export default async function handler(req, res) {
   try {
     // Resolve agent_id from language parameter (defaults to English)
     const lang = req.body?.lang || 'en';
+    const utm = req.body?.utm || {};
     const agent_id = AGENT_MAP[lang] || RETELL_AGENT_ID;
 
     if (!agent_id) {
@@ -56,7 +57,16 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${RETELL_API_KEY}`,
       },
-      body: JSON.stringify({ agent_id }),
+      body: JSON.stringify({
+        agent_id,
+        retell_llm_dynamic_variables: {
+          utm_source: utm.utm_source || 'direct',
+          utm_medium: utm.utm_medium || null,
+          utm_campaign: utm.utm_campaign || null,
+          utm_content: utm.utm_content || null,
+          utm_term: utm.utm_term || null,
+        },
+      }),
     });
 
     if (!response.ok) {
