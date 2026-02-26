@@ -142,29 +142,9 @@ export class ChatWidget {
         <p class="welcome-subtitle">${t.welcomeSubtitle}</p>
         <div class="welcome-lang-selector">
           <button class="lang-btn selected" data-lang="en">
-            <span class="lang-flag">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" width="24" height="16">
-                <clipPath id="uk-flag-clip-outer"><path d="M0 0v30h60V0z"/></clipPath>
-                <clipPath id="uk-flag-clip-inner"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath>
-                <g clip-path="url(#uk-flag-clip-outer)">
-                  <path d="M0 0v30h60V0z" fill="#012169"/>
-                  <path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/>
-                  <path d="M0 0l60 30m0-30L0 30" clip-path="url(#uk-flag-clip-inner)" stroke="#C8102E" stroke-width="4"/>
-                  <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/>
-                  <path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/>
-                </g>
-              </svg>
-            </span>
             <span class="lang-label">English</span>
           </button>
           <button class="lang-btn" data-lang="fr">
-            <span class="lang-flag">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2" width="24" height="16">
-                <rect width="1" height="2" fill="#002395"/>
-                <rect x="1" width="1" height="2" fill="#fff"/>
-                <rect x="2" width="1" height="2" fill="#ED2939"/>
-              </svg>
-            </span>
             <span class="lang-label">Français</span>
           </button>
         </div>
