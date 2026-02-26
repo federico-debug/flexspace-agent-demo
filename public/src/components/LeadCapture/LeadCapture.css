@@ -14,7 +14,6 @@
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
   border-radius: 24px;
-  overflow-y: auto;
 }
 
 .floating .lead-screen {
@@ -118,6 +117,10 @@
   margin: -4px 0 0 2px;
   text-align: left;
 }
+
+/* Subclass hooks for JS targeting — no additional styles needed currently */
+.lead-error-name,
+.lead-error-contact {}
 
 /* Submit button — same style as .welcome-start-btn */
 .lead-submit {
