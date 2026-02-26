@@ -17,6 +17,7 @@ import { ChatInput } from './ChatInput.js';
 import { TypingIndicator } from './TypingIndicator.js';
 import { ExampleQuestions } from '../ExampleQuestions/ExampleQuestions.js';
 import { ChatHistory } from '../ChatHistory/ChatHistory.js';
+import { LeadCapture } from '../LeadCapture/LeadCapture.js';
 
 export class ChatWidget {
   /**
@@ -34,6 +35,7 @@ export class ChatWidget {
     this.typingIndicator = new TypingIndicator();
     this.startersComponent = null;
     this.historyPanel = null;
+    this.leadCapture = null;
 
     // State
     this.element = null;
@@ -129,7 +131,7 @@ export class ChatWidget {
 
     // Welcome screen overlay
     this.welcomeScreen = document.createElement('div');
-    this.welcomeScreen.className = 'chat-welcome-screen visible';
+    this.welcomeScreen.className = 'chat-welcome-screen';
     const t = this.getTranslations();
     this.welcomeScreen.innerHTML = `
       <div class="welcome-content">
@@ -186,6 +188,11 @@ export class ChatWidget {
     widget.appendChild(inputContainer);
     widget.appendChild(this.welcomeScreen);
     this.historyPanel.mount(widget);
+
+    // Lead capture screen (step 1 — before language selector)
+    const defaultT = this.getTranslations();
+    this.leadCapture = new LeadCapture(defaultT, () => this._showLangScreen());
+    this.leadCapture.mount(widget);
 
     this.element = widget;
     this.setupServiceListeners();
@@ -248,19 +255,33 @@ export class ChatWidget {
   }
 
   /**
-   * Show welcome screen if no active chat
+   * Show lead capture screen (step 1 of pre-chat flow).
+   * Refreshes content so returning-user check runs against current localStorage.
    */
   showWelcomeScreen() {
     if (this.chatService.isActiveChat() || this.isProcessing) return;
+    const t = this.getTranslations();
+    this.leadCapture?.refresh(t);
+    this.leadCapture?.show();
+    this.welcomeScreen?.classList.remove('visible');
+  }
+
+  /**
+   * Show language selector screen (step 2 of pre-chat flow).
+   * Called after lead capture completes.
+   */
+  _showLangScreen() {
+    this.leadCapture?.hide();
     if (this.welcomeScreen) {
       this.welcomeScreen.classList.add('visible');
     }
   }
 
   /**
-   * Hide welcome screen without starting chat (e.g. resuming active conversation)
+   * Hide both the lead screen and the language selector screen.
    */
   hideWelcomeScreen() {
+    this.leadCapture?.hide();
     if (this.welcomeScreen) {
       this.welcomeScreen.classList.remove('visible');
     }
