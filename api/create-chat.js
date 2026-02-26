@@ -40,6 +40,7 @@ export default async function handler(req, res) {
     // Resolve agent_id from language parameter (defaults to English)
     const lang = req.body?.lang || 'en';
     const utm = req.body?.utm || {};
+    const leadData = req.body?.leadData || {};
     const agent_id = AGENT_MAP[lang] || RETELL_AGENT_ID;
 
     if (!agent_id) {
@@ -56,6 +57,10 @@ export default async function handler(req, res) {
         utm_campaign: utm.utm_campaign || null,
         utm_content: utm.utm_content || null,
         utm_term: utm.utm_term || null,
+        first_name: leadData.first_name || null,
+        last_name: leadData.last_name || null,
+        email: leadData.email || null,
+        phone: leadData.phone || null,
       },
     });
 
