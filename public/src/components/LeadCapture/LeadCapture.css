@@ -1,0 +1,221 @@
+/* Lead Capture Screen — overlays the full widget, z-index above welcome screen */
+.lead-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 51; /* above .chat-welcome-screen (z-index: 50) */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  border-radius: 24px;
+  overflow-y: auto;
+}
+
+.floating .lead-screen {
+  border-radius: 0;
+}
+
+/* When the lead screen is visible in floating mode, hide underlying content */
+.floating .chat-widget:has(.lead-screen.visible) > :not(.lead-screen):not(.chat-welcome-screen) {
+  visibility: hidden;
+}
+
+.lead-screen.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Content container */
+.lead-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 400px;
+  animation: leadFadeUp 0.4s ease-out 0.05s both;
+}
+
+@keyframes leadFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.lead-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1d2a67;
+}
+
+.lead-subtitle {
+  margin: 0;
+  font-size: 15px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* Form */
+.lead-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+}
+
+/* Two inputs side by side */
+.lead-name-row {
+  display: flex;
+  gap: 10px;
+}
+
+.lead-name-row .lead-field {
+  flex: 1;
+}
+
+/* Input wrapper */
+.lead-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.lead-field input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1f2937;
+  background: #f9fafb;
+  transition: border-color 0.2s, background 0.2s;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.lead-field input::placeholder {
+  color: #9ca3af;
+}
+
+.lead-field input:focus {
+  border-color: #da4e29;
+  background: #ffffff;
+}
+
+/* Error messages */
+.lead-error {
+  font-size: 12px;
+  color: #ef4444;
+  margin: -4px 0 0 2px;
+  text-align: left;
+}
+
+/* Submit button — same style as .welcome-start-btn */
+.lead-submit {
+  margin-top: 6px;
+  padding: 14px 48px;
+  background: #da4e29;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  align-self: center;
+}
+
+.lead-submit:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.lead-submit:not(:disabled):hover {
+  background: #b8401f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(218, 78, 41, 0.3);
+}
+
+.lead-submit:not(:disabled):active {
+  transform: translateY(0);
+}
+
+/* ── Returning user confirmation ── */
+.lead-returning-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px 20px;
+  width: 100%;
+  text-align: left;
+}
+
+.lead-returning-name {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.lead-returning-contact {
+  margin: 2px 0 0 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.lead-returning-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Primary confirm button */
+.lead-confirm-yes {
+  flex: 1;
+  padding: 12px;
+  background: #da4e29;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.lead-confirm-yes:hover {
+  background: #b8401f;
+}
+
+/* Secondary ghost button */
+.lead-confirm-no {
+  flex: 1;
+  padding: 12px;
+  background: #ffffff;
+  color: #6b7280;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.lead-confirm-no:hover {
+  border-color: #da4e29;
+  color: #da4e29;
+}
