@@ -75,15 +75,15 @@ export class LeadCapture {
     const content = document.createElement('div');
     content.className = 'lead-content';
     content.innerHTML = `
-      <h3 class="lead-title">${t.leadReturningTitle}, ${this._esc(first_name || displayName)}!</h3>
+      <h3 class="lead-title">${this._esc(t.leadReturningTitle)}, ${this._esc(first_name || displayName)}!</h3>
       <div class="lead-returning-card">
         <p class="lead-returning-name">${this._esc(displayName)}</p>
         ${email ? `<p class="lead-returning-contact">${this._esc(email)}</p>` : ''}
         ${phone ? `<p class="lead-returning-contact">${this._esc(phone)}</p>` : ''}
       </div>
       <div class="lead-returning-actions">
-        <button class="lead-confirm-yes">${t.leadReturningYes}</button>
-        <button class="lead-confirm-no">${t.leadReturningNo}</button>
+        <button class="lead-confirm-yes">${this._esc(t.leadReturningYes)}</button>
+        <button class="lead-confirm-no">${this._esc(t.leadReturningNo)}</button>
       </div>
     `;
 
@@ -93,10 +93,8 @@ export class LeadCapture {
 
     content.querySelector('.lead-confirm-no').addEventListener('click', () => {
       LeadStore.clear();
-      // Swap confirmation for the form in place
-      const parent = content.parentNode;
-      parent.innerHTML = '';
-      parent.appendChild(this._buildForm());
+      this.element.innerHTML = '';
+      this._render(this.element);
     });
 
     return content;
@@ -108,26 +106,26 @@ export class LeadCapture {
     const content = document.createElement('div');
     content.className = 'lead-content';
     content.innerHTML = `
-      <h3 class="lead-title">${t.leadTitle}</h3>
-      <p class="lead-subtitle">${t.leadSubtitle}</p>
+      <h3 class="lead-title">${this._esc(t.leadTitle)}</h3>
+      <p class="lead-subtitle">${this._esc(t.leadSubtitle)}</p>
       <form class="lead-form" novalidate>
         <div class="lead-name-row">
           <div class="lead-field">
-            <input type="text" name="first_name" placeholder="${t.leadFirstName}" autocomplete="given-name" />
+            <input type="text" name="first_name" placeholder="${this._esc(t.leadFirstName)}" autocomplete="given-name" />
           </div>
           <div class="lead-field">
-            <input type="text" name="last_name" placeholder="${t.leadLastName}" autocomplete="family-name" />
+            <input type="text" name="last_name" placeholder="${this._esc(t.leadLastName)}" autocomplete="family-name" />
           </div>
         </div>
-        <p class="lead-error lead-error-name" style="display:none">${t.leadErrorName}</p>
+        <p class="lead-error lead-error-name" style="display:none">${this._esc(t.leadErrorName)}</p>
         <div class="lead-field">
-          <input type="email" name="email" placeholder="${t.leadEmail}" autocomplete="email" />
+          <input type="email" name="email" placeholder="${this._esc(t.leadEmail)}" autocomplete="email" />
         </div>
         <div class="lead-field">
-          <input type="tel" name="phone" placeholder="${t.leadPhone}" autocomplete="tel" />
+          <input type="tel" name="phone" placeholder="${this._esc(t.leadPhone)}" autocomplete="tel" />
         </div>
-        <p class="lead-error lead-error-contact" style="display:none">${t.leadErrorContact}</p>
-        <button type="submit" class="lead-submit" disabled>${t.leadContinue}</button>
+        <p class="lead-error lead-error-contact" style="display:none">${this._esc(t.leadErrorContact)}</p>
+        <button type="submit" class="lead-submit" disabled>${this._esc(t.leadContinue)}</button>
       </form>
     `;
 
