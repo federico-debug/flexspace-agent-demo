@@ -68,7 +68,20 @@ export const CONFIG = {
       rateTitle: 'How was your experience?',
       rateThankYou: 'Thanks for your feedback!',
       rateCommentPlaceholder: 'Any additional comments? (optional)',
-      rateSend: 'Send'
+      rateSend: 'Send',
+      // Lead capture
+      leadTitle: 'Get started',
+      leadSubtitle: 'Enter your info to connect with an agent',
+      leadFirstName: 'First Name',
+      leadLastName: 'Last Name',
+      leadEmail: 'Email',
+      leadPhone: 'Phone',
+      leadContinue: 'Continue',
+      leadErrorName: 'Please enter your first or last name',
+      leadErrorContact: 'Please enter your email or phone number',
+      leadReturningTitle: 'Welcome back',
+      leadReturningYes: "Yes, that's me",
+      leadReturningNo: 'Use different info'
     },
     fr: {
       welcomeTitle: 'FlexSpace Logistics',
@@ -93,7 +106,20 @@ export const CONFIG = {
       rateTitle: 'Comment était votre expérience ?',
       rateThankYou: 'Merci pour votre retour !',
       rateCommentPlaceholder: 'Des commentaires supplémentaires ? (optionnel)',
-      rateSend: 'Envoyer'
+      rateSend: 'Envoyer',
+      // Lead capture
+      leadTitle: 'Commencer',
+      leadSubtitle: 'Entrez vos informations pour parler avec un agent',
+      leadFirstName: 'Prénom',
+      leadLastName: 'Nom',
+      leadEmail: 'Courriel',
+      leadPhone: 'Téléphone',
+      leadContinue: 'Continuer',
+      leadErrorName: 'Veuillez entrer votre prénom ou nom',
+      leadErrorContact: 'Veuillez entrer votre courriel ou numéro de téléphone',
+      leadReturningTitle: 'Bon retour',
+      leadReturningYes: "Oui, c'est moi",
+      leadReturningNo: "Utiliser d'autres informations"
     }
   },
   // Rating webhook URLs per language
