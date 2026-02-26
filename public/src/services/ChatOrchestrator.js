@@ -15,6 +15,7 @@ import { VariableExtractor } from './VariableExtractor.js';
 import { chatHistoryStore } from './ChatHistoryStore.js';
 import { CONFIG } from './config.js';
 import { getUtmParams } from '../utils/utm.js';
+import { LeadStore } from './LeadStore.js';
 
 export class ChatOrchestrator {
   /**
@@ -74,7 +75,8 @@ export class ChatOrchestrator {
   async createChat(resetChat = false) {
     try {
       const utm = getUtmParams();
-      const data = await this.apiClient.createChat(resetChat, this.selectedLang, utm);
+      const leadData = LeadStore.get() || {};
+      const data = await this.apiClient.createChat(resetChat, this.selectedLang, utm, leadData);
 
       this.state.initChat(data.chat_id);
 

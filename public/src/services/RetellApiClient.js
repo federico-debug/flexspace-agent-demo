@@ -11,11 +11,11 @@ export class RetellApiClient {
    * @param {string} [lang='en'] - Language code for agent selection
    * @returns {Promise<{chat_id: string}>}
    */
-  async createChat(resetChat = false, lang = 'en', utm = {}) {
+  async createChat(resetChat = false, lang = 'en', utm = {}, leadData = {}) {
     const response = await fetch(`${CONFIG.baseUrl}/api/create-chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reset_chat: resetChat, lang, utm })
+      body: JSON.stringify({ reset_chat: resetChat, lang, utm, leadData })
     });
 
     if (!response.ok) {
