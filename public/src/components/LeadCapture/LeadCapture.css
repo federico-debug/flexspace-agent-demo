@@ -222,3 +222,123 @@
   border-color: #da4e29;
   color: #da4e29;
 }
+
+/* ── Phone row (country picker + digit input as one visual unit) ── */
+.lead-phone-row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+  transition: border-color 0.2s, background 0.2s;
+  overflow: visible;
+}
+
+.lead-phone-row:focus-within {
+  border-color: #da4e29;
+  background: #ffffff;
+}
+
+/* Country picker button */
+.lead-country-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  border: none;
+  border-right: 1.5px solid #e5e7eb;
+  border-radius: 8px 0 0 8px;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: #374151;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.lead-country-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.lead-country-flag {
+  width: 20px;
+  height: 15px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.lead-dial-code {
+  color: #374151;
+  font-size: 13px;
+}
+
+.lead-caret {
+  font-size: 9px;
+  color: #9ca3af;
+  margin-left: 1px;
+}
+
+/* Digit input */
+.lead-phone-row input[name="phone_digits"] {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 14px 11px 10px;
+  border: none;
+  border-radius: 0 8px 8px 0;
+  background: transparent;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1f2937;
+  outline: none;
+}
+
+.lead-phone-row input[name="phone_digits"]::placeholder {
+  color: #9ca3af;
+}
+
+/* Country dropdown */
+.lead-country-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 230px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+}
+
+.lead-country-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.lead-country-option:hover {
+  background: #f9fafb;
+}
+
+.lead-country-name {
+  flex: 1;
+  color: #1f2937;
+}
+
+.lead-country-option .lead-dial-code {
+  color: #9ca3af;
+  font-size: 12px;
+}

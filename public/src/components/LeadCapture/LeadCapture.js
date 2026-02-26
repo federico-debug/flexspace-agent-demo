@@ -10,6 +10,32 @@
  */
 import { LeadStore } from '../../services/LeadStore.js';
 
+const COUNTRIES = [
+  { code: 'CA', dial: '+1',   name: 'Canada' },
+  { code: 'US', dial: '+1',   name: 'United States' },
+  { code: 'MX', dial: '+52',  name: 'Mexico' },
+  { code: 'GB', dial: '+44',  name: 'United Kingdom' },
+  { code: 'FR', dial: '+33',  name: 'France' },
+  { code: 'ES', dial: '+34',  name: 'Spain' },
+  { code: 'DE', dial: '+49',  name: 'Germany' },
+  { code: 'IT', dial: '+39',  name: 'Italy' },
+  { code: 'PT', dial: '+351', name: 'Portugal' },
+  { code: 'BR', dial: '+55',  name: 'Brazil' },
+  { code: 'AR', dial: '+54',  name: 'Argentina' },
+  { code: 'CO', dial: '+57',  name: 'Colombia' },
+  { code: 'CL', dial: '+56',  name: 'Chile' },
+  { code: 'PE', dial: '+51',  name: 'Peru' },
+  { code: 'AU', dial: '+61',  name: 'Australia' },
+  { code: 'NL', dial: '+31',  name: 'Netherlands' },
+  { code: 'BE', dial: '+32',  name: 'Belgium' },
+  { code: 'CN', dial: '+86',  name: 'China' },
+  { code: 'JP', dial: '+81',  name: 'Japan' },
+  { code: 'IN', dial: '+91',  name: 'India' },
+  { code: 'KR', dial: '+82',  name: 'South Korea' },
+];
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export class LeadCapture {
   /**
    * @param {Object} t - Translation strings (from CONFIG.i18n)
@@ -121,8 +147,15 @@ export class LeadCapture {
         <div class="lead-field">
           <input type="email" name="email" placeholder="${this._esc(t.leadEmail)}" autocomplete="email" />
         </div>
-        <div class="lead-field">
-          <input type="tel" name="phone" placeholder="${this._esc(t.leadPhone)}" autocomplete="tel" />
+        <div class="lead-phone-row">
+          <button type="button" class="lead-country-btn" aria-label="Select country code">
+            <span class="fi fi-ca lead-country-flag"></span>
+            <span class="lead-dial-code">+1</span>
+            <span class="lead-caret">▾</span>
+          </button>
+          <div class="lead-country-dropdown" hidden></div>
+          <input type="tel" name="phone_digits" placeholder="${this._esc(t.leadPhone)}" autocomplete="tel-national" inputmode="numeric" />
+          <input type="hidden" name="phone_dial" value="+1" />
         </div>
         <p class="lead-error lead-error-contact" style="display:none">${this._esc(t.leadErrorContact)}</p>
         <button type="submit" class="lead-submit" disabled>${this._esc(t.leadContinue)}</button>
@@ -133,9 +166,50 @@ export class LeadCapture {
     const submitBtn    = content.querySelector('.lead-submit');
     const errorName    = content.querySelector('.lead-error-name');
     const errorContact = content.querySelector('.lead-error-contact');
+    const phoneRow     = content.querySelector('.lead-phone-row');
+    const countryBtn   = content.querySelector('.lead-country-btn');
+    const dropdown     = content.querySelector('.lead-country-dropdown');
+    const flagEl       = countryBtn.querySelector('.lead-country-flag');
+    const dialEl       = countryBtn.querySelector('.lead-dial-code');
+    const phoneDialInput = content.querySelector('[name="phone_dial"]');
 
-    // Enable/disable button as user types
-    form.addEventListener('input', () => {
+    // Populate country dropdown
+    COUNTRIES.forEach(c => {
+      const opt = document.createElement('button');
+      opt.type = 'button';
+      opt.className = 'lead-country-option';
+      opt.innerHTML = `
+        <span class="fi fi-${c.code.toLowerCase()} lead-country-flag"></span>
+        <span class="lead-country-name">${this._esc(c.name)}</span>
+        <span class="lead-dial-code">${this._esc(c.dial)}</span>
+      `;
+      opt.addEventListener('click', () => {
+        flagEl.className = `fi fi-${c.code.toLowerCase()} lead-country-flag`;
+        dialEl.textContent = c.dial;
+        phoneDialInput.value = c.dial;
+        dropdown.hidden = true;
+        submitBtn.disabled = !this._isValid(this._readForm(form));
+      });
+      dropdown.appendChild(opt);
+    });
+
+    // Toggle dropdown on button click
+    countryBtn.addEventListener('click', () => {
+      dropdown.hidden = !dropdown.hidden;
+    });
+
+    // Close dropdown when focus leaves the phone row entirely
+    phoneRow.addEventListener('focusout', (e) => {
+      if (!e.relatedTarget || !phoneRow.contains(e.relatedTarget)) {
+        dropdown.hidden = true;
+      }
+    });
+
+    // Enable/disable submit + enforce digits-only on phone field
+    form.addEventListener('input', (e) => {
+      if (e.target.name === 'phone_digits') {
+        e.target.value = e.target.value.replace(/\D/g, '');
+      }
       submitBtn.disabled = !this._isValid(this._readForm(form));
     });
 
@@ -144,11 +218,12 @@ export class LeadCapture {
       const data = this._readForm(form);
       const hasName    = !!(data.first_name || data.last_name);
       const hasContact = !!(data.email || data.phone);
+      const emailOk    = !data.email || EMAIL_RE.test(data.email);
 
-      errorName.style.display    = hasName    ? 'none' : 'block';
-      errorContact.style.display = hasContact ? 'none' : 'block';
+      errorName.style.display    = hasName                  ? 'none' : 'block';
+      errorContact.style.display = (hasContact && emailOk)  ? 'none' : 'block';
 
-      if (!hasName || !hasContact) return;
+      if (!hasName || !hasContact || !emailOk) return;
 
       LeadStore.save(data);
       this.onComplete(data);
@@ -158,17 +233,22 @@ export class LeadCapture {
   }
 
   _readForm(form) {
-    const fd = new FormData(form);
+    const fd     = new FormData(form);
+    const dial   = fd.get('phone_dial') || '+1';
+    const digits = fd.get('phone_digits')?.trim() || '';
     return {
       first_name: fd.get('first_name')?.trim() || '',
       last_name:  fd.get('last_name')?.trim()  || '',
       email:      fd.get('email')?.trim()      || '',
-      phone:      fd.get('phone')?.trim()      || ''
+      phone:      digits ? (dial + digits) : ''
     };
   }
 
   _isValid(data) {
-    return !!(data.first_name || data.last_name) && !!(data.email || data.phone);
+    const hasName    = !!(data.first_name || data.last_name);
+    const hasContact = !!(data.email || data.phone);
+    const emailOk    = !data.email || EMAIL_RE.test(data.email);
+    return hasName && hasContact && emailOk;
   }
 
   /** Escape user-supplied values inserted via innerHTML */
