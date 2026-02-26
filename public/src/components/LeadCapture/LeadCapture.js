@@ -11,27 +11,27 @@
 import { LeadStore } from '../../services/LeadStore.js';
 
 const COUNTRIES = [
-  { code: 'CA', dial: '+1',   name: 'Canada' },
-  { code: 'US', dial: '+1',   name: 'United States' },
-  { code: 'MX', dial: '+52',  name: 'Mexico' },
-  { code: 'GB', dial: '+44',  name: 'United Kingdom' },
-  { code: 'FR', dial: '+33',  name: 'France' },
-  { code: 'ES', dial: '+34',  name: 'Spain' },
-  { code: 'DE', dial: '+49',  name: 'Germany' },
-  { code: 'IT', dial: '+39',  name: 'Italy' },
-  { code: 'PT', dial: '+351', name: 'Portugal' },
-  { code: 'BR', dial: '+55',  name: 'Brazil' },
-  { code: 'AR', dial: '+54',  name: 'Argentina' },
-  { code: 'CO', dial: '+57',  name: 'Colombia' },
-  { code: 'CL', dial: '+56',  name: 'Chile' },
-  { code: 'PE', dial: '+51',  name: 'Peru' },
-  { code: 'AU', dial: '+61',  name: 'Australia' },
-  { code: 'NL', dial: '+31',  name: 'Netherlands' },
-  { code: 'BE', dial: '+32',  name: 'Belgium' },
-  { code: 'CN', dial: '+86',  name: 'China' },
-  { code: 'JP', dial: '+81',  name: 'Japan' },
-  { code: 'IN', dial: '+91',  name: 'India' },
-  { code: 'KR', dial: '+82',  name: 'South Korea' },
+  { code: 'CA', dial: '+1',   name: 'Canada',         digits: [10, 10] },
+  { code: 'US', dial: '+1',   name: 'United States',  digits: [10, 10] },
+  { code: 'MX', dial: '+52',  name: 'Mexico',         digits: [10, 10] },
+  { code: 'GB', dial: '+44',  name: 'United Kingdom', digits: [10, 10] },
+  { code: 'FR', dial: '+33',  name: 'France',         digits: [9,  9]  },
+  { code: 'ES', dial: '+34',  name: 'Spain',          digits: [9,  9]  },
+  { code: 'DE', dial: '+49',  name: 'Germany',        digits: [10, 12] },
+  { code: 'IT', dial: '+39',  name: 'Italy',          digits: [9,  10] },
+  { code: 'PT', dial: '+351', name: 'Portugal',       digits: [9,  9]  },
+  { code: 'BR', dial: '+55',  name: 'Brazil',         digits: [10, 11] },
+  { code: 'AR', dial: '+54',  name: 'Argentina',      digits: [10, 10] },
+  { code: 'CO', dial: '+57',  name: 'Colombia',       digits: [10, 10] },
+  { code: 'CL', dial: '+56',  name: 'Chile',          digits: [9,  9]  },
+  { code: 'PE', dial: '+51',  name: 'Peru',           digits: [9,  9]  },
+  { code: 'AU', dial: '+61',  name: 'Australia',      digits: [9,  9]  },
+  { code: 'NL', dial: '+31',  name: 'Netherlands',    digits: [9,  9]  },
+  { code: 'BE', dial: '+32',  name: 'Belgium',        digits: [9,  9]  },
+  { code: 'CN', dial: '+86',  name: 'China',          digits: [11, 11] },
+  { code: 'JP', dial: '+81',  name: 'Japan',          digits: [10, 11] },
+  { code: 'IN', dial: '+91',  name: 'India',          digits: [10, 10] },
+  { code: 'KR', dial: '+82',  name: 'South Korea',    digits: [10, 11] },
 ];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -91,7 +91,7 @@ export class LeadCapture {
     const content = existing ? this._buildConfirmation(existing) : this._buildForm();
 
     const logo = document.createElement('img');
-    logo.src = 'logo.svg';
+    logo.src = 'agent-avatar.png';
     logo.alt = 'FlexSpace';
     logo.className = 'lead-logo';
     content.insertBefore(logo, content.firstChild);
@@ -134,6 +134,7 @@ export class LeadCapture {
 
   _buildForm() {
     const t = this.t;
+    this._selectedCountry = COUNTRIES[0];
 
     const content = document.createElement('div');
     content.className = 'lead-content';
@@ -190,6 +191,7 @@ export class LeadCapture {
         <span class="lead-dial-code">${this._esc(c.dial)}</span>
       `;
       opt.addEventListener('click', () => {
+        this._selectedCountry = c;
         flagEl.className = `fi fi-${c.code.toLowerCase()} lead-country-flag`;
         dialEl.textContent = c.dial;
         phoneDialInput.value = c.dial;
@@ -231,8 +233,9 @@ export class LeadCapture {
 
       if (!hasName || !hasContact || !emailOk) return;
 
-      LeadStore.save(data);
-      this.onComplete(data);
+      const { phoneDigits, ...saveData } = data;
+      LeadStore.save(saveData);
+      this.onComplete(saveData);
     });
 
     return content;
@@ -243,10 +246,11 @@ export class LeadCapture {
     const dial   = fd.get('phone_dial') || '+1';
     const digits = fd.get('phone_digits')?.trim() || '';
     return {
-      first_name: fd.get('first_name')?.trim() || '',
-      last_name:  fd.get('last_name')?.trim()  || '',
-      email:      fd.get('email')?.trim()      || '',
-      phone:      digits ? (dial + digits) : ''
+      first_name:   fd.get('first_name')?.trim() || '',
+      last_name:    fd.get('last_name')?.trim()  || '',
+      email:        fd.get('email')?.trim()      || '',
+      phone:        digits ? (dial + digits) : '',
+      phoneDigits:  digits,
     };
   }
 
@@ -254,7 +258,13 @@ export class LeadCapture {
     const hasName    = !!(data.first_name || data.last_name);
     const hasContact = !!(data.email || data.phone);
     const emailOk    = !data.email || EMAIL_RE.test(data.email);
-    return hasName && hasContact && emailOk;
+    const phoneOk    = !data.phoneDigits || this._phoneDigitsOk(data.phoneDigits);
+    return hasName && hasContact && emailOk && phoneOk;
+  }
+
+  _phoneDigitsOk(digits) {
+    const [min, max] = (this._selectedCountry || COUNTRIES[0]).digits;
+    return digits.length >= min && digits.length <= max;
   }
 
   /** Escape user-supplied values inserted via innerHTML */

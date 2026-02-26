@@ -30,12 +30,12 @@
   visibility: visible;
 }
 
-/* Brand logo */
+/* Brand logo — matches .welcome-avatar sizing */
 .lead-logo {
-  width: 130px;
-  height: auto;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
   display: block;
-  margin-bottom: 4px;
 }
 
 /* Content container */
