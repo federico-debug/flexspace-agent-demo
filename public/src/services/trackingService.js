@@ -3,6 +3,7 @@
  */
 import { CONFIG } from './config.js';
 import { getUtmParams } from '../utils/utm.js';
+import { LeadStore } from './LeadStore.js';
 
 export class TrackingService {
   /**
@@ -19,6 +20,7 @@ export class TrackingService {
       event: 'chat_started',
       chatId,
       lang,
+      lead: LeadStore.get() || {},
       utm: getUtmParams(),
       pageUrl: window.location.href,
       referrer: document.referrer || '',
