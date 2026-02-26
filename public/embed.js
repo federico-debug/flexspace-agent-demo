@@ -30,8 +30,20 @@
     '/src/components/ExampleQuestions/ExampleQuestions.css',
     '/src/components/ChatWidget/ChatWidget.css',
     '/src/components/ChatHistory/ChatHistory.css',
-    '/src/components/FloatingChatButton/FloatingChatButton.css'
+    '/src/components/FloatingChatButton/FloatingChatButton.css',
+    '/src/components/LeadCapture/LeadCapture.css'
   ];
+
+  // External CSS (flag icons for country code picker)
+  var externalCss = [
+    'https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css'
+  ];
+  externalCss.forEach(function (href) {
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  });
 
   // Inject all CSS files
   cssFiles.forEach(function (file) {

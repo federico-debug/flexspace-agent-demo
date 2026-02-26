@@ -9,6 +9,7 @@
  * Calls onComplete(leadData) when ready to proceed.
  */
 import { LeadStore } from '../../services/LeadStore.js';
+import { CONFIG } from '../../services/config.js';
 
 const COUNTRIES = [
   { code: 'CA', dial: '+1',   name: 'Canada',         digits: [10, 10] },
@@ -91,7 +92,7 @@ export class LeadCapture {
     const content = existing ? this._buildConfirmation(existing) : this._buildForm();
 
     const logo = document.createElement('img');
-    logo.src = 'agent-avatar.png';
+    logo.src = `${CONFIG.baseUrl}/agent-avatar.png`;
     logo.alt = 'FlexSpace';
     logo.className = 'lead-logo';
     content.insertBefore(logo, content.firstChild);
