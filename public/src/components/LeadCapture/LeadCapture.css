@@ -30,6 +30,14 @@
   visibility: visible;
 }
 
+/* Brand logo */
+.lead-logo {
+  width: 130px;
+  height: auto;
+  display: block;
+  margin-bottom: 4px;
+}
+
 /* Content container */
 .lead-content {
   display: flex;

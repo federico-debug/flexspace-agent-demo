@@ -88,9 +88,15 @@ export class LeadCapture {
 
   _render(container) {
     const existing = LeadStore.get();
-    container.appendChild(
-      existing ? this._buildConfirmation(existing) : this._buildForm()
-    );
+    const content = existing ? this._buildConfirmation(existing) : this._buildForm();
+
+    const logo = document.createElement('img');
+    logo.src = 'logo.svg';
+    logo.alt = 'FlexSpace';
+    logo.className = 'lead-logo';
+    content.insertBefore(logo, content.firstChild);
+
+    container.appendChild(content);
   }
 
   _buildConfirmation(data) {
