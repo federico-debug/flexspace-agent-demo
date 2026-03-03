@@ -390,6 +390,14 @@ export class ChatOrchestrator {
   get historyCount() {
     return chatHistoryStore.count;
   }
+
+  /**
+   * Get lead contact data captured during pre-chat flow.
+   * @returns {{ first_name: string, last_name: string, email: string, phone: string } | null}
+   */
+  getLeadData() {
+    return LeadStore.get();
+  }
 }
 
 // Default export for drop-in replacement

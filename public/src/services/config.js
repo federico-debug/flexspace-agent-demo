@@ -69,6 +69,11 @@ export const CONFIG = {
       rateThankYou: 'Thanks for your feedback!',
       rateCommentPlaceholder: 'Any additional comments? (optional)',
       rateSend: 'Send',
+      // Booking reminder (shown once when user clicks the calendar button)
+      bookingReminderBoth: "Once you've completed your booking, please check your email and accept the meeting invite — otherwise we'll reach out at the phone number you provided. Looking forward to connecting! 📅",
+      bookingReminderEmailOnly: "Once you've completed your booking, please check your email and accept the meeting invite. Looking forward to connecting! 📅",
+      bookingReminderPhoneOnly: "Once you've completed your booking, we'll reach out at the phone number you provided to confirm the details. Looking forward to connecting! 📅",
+      bookingReminderGeneric: "Once you've completed your booking, we'll be in touch to confirm. Looking forward to connecting! 📅",
       // Lead capture
       leadTitle: 'Get started',
       leadSubtitle: 'Enter your info to connect with an agent',
@@ -107,6 +112,11 @@ export const CONFIG = {
       rateThankYou: 'Merci pour votre retour !',
       rateCommentPlaceholder: 'Des commentaires supplémentaires ? (optionnel)',
       rateSend: 'Envoyer',
+      // Booking reminder (shown once when user clicks the calendar button)
+      bookingReminderBoth: "Une fois votre rendez-vous pris, veuillez vérifier votre courriel et accepter l'invitation — sinon nous vous contacterons au numéro fourni. Au plaisir de vous parler ! 📅",
+      bookingReminderEmailOnly: "Une fois votre rendez-vous pris, veuillez vérifier votre courriel et accepter l'invitation. Au plaisir de vous parler ! 📅",
+      bookingReminderPhoneOnly: "Une fois votre rendez-vous pris, nous vous contacterons au numéro fourni pour confirmer les détails. Au plaisir de vous parler ! 📅",
+      bookingReminderGeneric: "Une fois votre rendez-vous pris, nous vous contacterons pour confirmer. Au plaisir de vous parler ! 📅",
       // Lead capture
       leadTitle: 'Commencer',
       leadSubtitle: 'Entrez vos informations pour parler avec un agent',

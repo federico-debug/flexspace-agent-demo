@@ -11,6 +11,7 @@
 import { CONFIG } from '../../services/config.js';
 import { RatingService } from '../../services/ratingService.js';
 import { TrackingService } from '../../services/trackingService.js';
+import { buildBookingReminder } from '../../utils/buildBookingReminder.js';
 import { chatHistoryStore } from '../../services/ChatHistoryStore.js';
 import { MessageList } from './MessageList.js';
 import { ChatInput } from './ChatInput.js';
@@ -45,6 +46,7 @@ export class ChatWidget {
     this.startersShown = false;
     this.isChatEnded = false;
     this.isProcessing = false;
+    this.bookingReminderSent = false;
     this.conversationEndedBanner = null;
     this.isViewingHistory = false;
     this.selectedLang = CONFIG.defaultLang || 'en';
@@ -88,6 +90,13 @@ export class ChatWidget {
     // Messages container
     const messagesContainer = this.messageList.create();
     this.typingIndicator.setContainer(messagesContainer);
+
+    // Booking reminder: fire once when user clicks any calendar button
+    messagesContainer.addEventListener('click', (e) => {
+      if (e.target.closest('.outlook-calendar-button')) {
+        this.handleBookingButtonClick();
+      }
+    });
 
     // Starters setup
     if (CONFIG.chatStarters?.length > 0) {
@@ -381,6 +390,19 @@ export class ChatWidget {
   }
 
   /**
+   * Handle calendar booking button click — shows a one-time reminder.
+   * Message is dynamic based on what contact info the user provided.
+   */
+  handleBookingButtonClick() {
+    if (this.bookingReminderSent || this.isChatEnded) return;
+    this.bookingReminderSent = true;
+
+    const lead = this.chatService.getLeadData();
+    const t = this.getTranslations();
+    this.messageList.addBotMessage(buildBookingReminder(lead, t));
+  }
+
+  /**
    * Handle starter question click
    * @param {string} question
    */
@@ -435,6 +457,7 @@ export class ChatWidget {
     this.messageList.cancelStreaming();
     this.clearMessages();
     this.isChatEnded = false;
+    this.bookingReminderSent = false;
     this.chatInput.enable();
     this.chatService.reset();
     this.chatService.shouldResetChat = true;
